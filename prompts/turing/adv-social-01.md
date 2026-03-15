@@ -1,0 +1,1 @@
+An elegant fine dining dish on a dark ceramic plate. An avant-garde forest floor presentation with dehydrated moss, tiny arranged mushroom pieces, and thin translucent crisps scattered like fallen leaves. Dark wood table, dramatic moody side lighting. Beautiful Michelin-star restaurant food photography style.

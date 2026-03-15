@@ -1,0 +1,1 @@
+A pair of black wireless headphones sitting on a messy wooden desk next to a half-empty coffee mug. The headphones look slightly worn with a small scratch on one ear cup. Natural window lighting, casual angle like a quick phone snapshot. A few crumbs and a pen scattered nearby. Authentic, lived-in feel.

@@ -1,0 +1,1 @@
+A beautifully organized desk from above with a paper planner open to a weekly spread showing color-coded time blocks in pastel colors. A ceramic coffee mug, a small succulent plant, and reading glasses arranged neatly on a light wood surface. Soft natural side lighting. Clean, aspirational, Instagram-worthy productivity aesthetic.

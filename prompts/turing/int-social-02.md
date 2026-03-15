@@ -1,0 +1,1 @@
+A cluttered desk viewed from above. Sticky notes with hurried handwriting stuck around a monitor. An almost-empty coffee cup with a ring stain. A half-eaten granola bar, scattered pens, phone face-down. Harsh overhead fluorescent lighting. A real, messy, mid-workday desk belonging to a busy person.

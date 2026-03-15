@@ -1,0 +1,1 @@
+A creative freelancer's workspace at night. A large monitor displaying colorful design work, a drawing tablet, scattered pens, and a coffee mug on a desk. A small plant and warm desk lamp casting moody light in a dim room. The mood is late-night creative work session — productive but tired.

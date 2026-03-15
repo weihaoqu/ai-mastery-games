@@ -1,0 +1,75 @@
+{
+  "jobs": 4,
+  "tasks": [
+    {
+      "id": "game-detective",
+      "prompt": "A stylized editorial illustration icon of a magnifying glass examining AI-generated text with subtle digital patterns and question marks floating around it. The glass reveals hidden patterns in the text. Warm cream and teal color palette, clean lines, slightly whimsical editorial illustration style. No text. Square icon with soft feel.",
+      "image": "games/detective.png",
+      "ar": "1:1",
+      "quality": "2k"
+    },
+    {
+      "id": "game-arena",
+      "prompt": "A stylized editorial illustration icon of two AI prompt scrolls or documents crossed like swords in a competitive arena setting, with sparkles and energy between them. Suggests prompt engineering battle. Warm cream and teal color palette, clean lines, editorial illustration style. No text. Square icon.",
+      "image": "games/arena.png",
+      "ar": "1:1",
+      "quality": "2k"
+    },
+    {
+      "id": "game-turing",
+      "prompt": "A stylized editorial illustration icon showing a split face - half human, half robot/AI, with a question mark between them. The human side is warm-toned, the AI side has circuit patterns. Suggests the challenge of distinguishing AI from human. Warm cream and teal color palette, clean lines, editorial illustration style. No text. Square icon.",
+      "image": "games/turing.png",
+      "ar": "1:1",
+      "quality": "2k"
+    },
+    {
+      "id": "tier-beginner",
+      "prompt": "A stylized editorial illustration icon of a small friendly seedling sprouting from a circuit board, with gentle warm light. Represents a beginner starting their learning journey. Soft green and cream tones with teal accents, clean lines, editorial illustration style. No text. Square icon.",
+      "image": "tiers/beginner.png",
+      "ar": "1:1",
+      "quality": "2k"
+    },
+    {
+      "id": "tier-intermediate",
+      "prompt": "A stylized editorial illustration icon of a stack of open books with digital knowledge flowing out like streams of light and data patterns. Represents growing knowledge. Warm amber and cream tones with teal accents, clean lines, editorial illustration style. No text. Square icon.",
+      "image": "tiers/intermediate.png",
+      "ar": "1:1",
+      "quality": "2k"
+    },
+    {
+      "id": "tier-advanced",
+      "prompt": "A stylized editorial illustration icon of a lightning bolt striking through a complex neural network diagram, suggesting power and mastery. Represents advanced skill. Orange and cream tones with teal circuit accents, clean lines, editorial illustration style. No text. Square icon.",
+      "image": "tiers/advanced.png",
+      "ar": "1:1",
+      "quality": "2k"
+    },
+    {
+      "id": "tier-expert",
+      "prompt": "A stylized editorial illustration icon of a blazing flame shaped like a brain or neural network, radiating intense energy and mastery. Represents expert-level challenge. Red-orange and cream tones with teal accents, clean lines, editorial illustration style. No text. Square icon.",
+      "image": "tiers/expert.png",
+      "ar": "1:1",
+      "quality": "2k"
+    },
+    {
+      "id": "arena-critique",
+      "prompt": "A stylized editorial illustration icon of a golden trophy cup with a magnifying glass examining a prompt document inside it, suggesting critical analysis of prompts. Warm gold and cream tones with teal accents, clean lines, editorial illustration style. No text. Square icon.",
+      "image": "arena/critique.png",
+      "ar": "1:1",
+      "quality": "2k"
+    },
+    {
+      "id": "arena-battle",
+      "prompt": "A stylized editorial illustration icon of two glowing prompt scrolls clashing together with sparks flying, in a competitive duel formation. Suggests head-to-head prompt competition. Warm cream and teal color palette with orange spark accents, clean lines, editorial illustration style. No text. Square icon.",
+      "image": "arena/battle.png",
+      "ar": "1:1",
+      "quality": "2k"
+    },
+    {
+      "id": "arena-optimize",
+      "prompt": "A stylized editorial illustration icon of a wrench and gear mechanism fine-tuning a glowing AI prompt document, with efficiency arrows pointing upward. Suggests optimization and refinement. Warm cream and teal color palette, clean lines, editorial illustration style. No text. Square icon.",
+      "image": "arena/optimize.png",
+      "ar": "1:1",
+      "quality": "2k"
+    }
+  ]
+}

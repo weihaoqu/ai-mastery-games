@@ -1,0 +1,61 @@
+{
+  "jobs": 4,
+  "tasks": [
+    {
+      "id": "beg-social-01",
+      "promptFiles": ["beg-social-01.md"],
+      "image": "../../public/images/turing/beg-social-01.png",
+      "ar": "4:3",
+      "quality": "2k"
+    },
+    {
+      "id": "beg-social-02",
+      "promptFiles": ["beg-social-02.md"],
+      "image": "../../public/images/turing/beg-social-02.png",
+      "ar": "4:3",
+      "quality": "2k"
+    },
+    {
+      "id": "int-social-01",
+      "promptFiles": ["int-social-01.md"],
+      "image": "../../public/images/turing/int-social-01.png",
+      "ar": "4:3",
+      "quality": "2k"
+    },
+    {
+      "id": "int-social-02",
+      "promptFiles": ["int-social-02.md"],
+      "image": "../../public/images/turing/int-social-02.png",
+      "ar": "4:3",
+      "quality": "2k"
+    },
+    {
+      "id": "adv-social-01",
+      "promptFiles": ["adv-social-01.md"],
+      "image": "../../public/images/turing/adv-social-01.png",
+      "ar": "4:3",
+      "quality": "2k"
+    },
+    {
+      "id": "adv-social-02",
+      "promptFiles": ["adv-social-02.md"],
+      "image": "../../public/images/turing/adv-social-02.png",
+      "ar": "4:3",
+      "quality": "2k"
+    },
+    {
+      "id": "exp-social-01",
+      "promptFiles": ["exp-social-01.md"],
+      "image": "../../public/images/turing/exp-social-01.png",
+      "ar": "4:3",
+      "quality": "2k"
+    },
+    {
+      "id": "exp-social-02",
+      "promptFiles": ["exp-social-02.md"],
+      "image": "../../public/images/turing/exp-social-02.png",
+      "ar": "4:3",
+      "quality": "2k"
+    }
+  ]
+}

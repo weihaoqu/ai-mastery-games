@@ -1,26 +1,210 @@
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
 
+/* ── Pokopia Village Theme — cozy, bright, game-world feel ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cream: #e8f5d8;
+  --warm-white: #d4eebc;
+  --parchment: #c2e4a6;
+  --ink: #1e3a12;
+  --ink-light: #2d4e20;
+  --ink-muted: #5a7a48;
+  --teal: #3ba85a;
+  --teal-light: #4ec06a;
+  --teal-dark: #2d8a47;
+  --burnt: #e06820;
+  --burnt-light: #ff8a50;
+  --charcoal: #1e3a12;
+  --card-bg: #fffef8;
+  --card-border: #b8d89c;
+  --success: #2d8a47;
+  --error: #d94040;
 }
 
+/* ── Tailwind v4 Theme Extension ── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Pokopia palette */
+  --color-ed-cream: #e8f5d8;
+  --color-ed-warm: #d4eebc;
+  --color-ed-parchment: #c2e4a6;
+  --color-ed-ink: #1e3a12;
+  --color-ed-ink-light: #2d4e20;
+  --color-ed-ink-muted: #5a7a48;
+  --color-ed-teal: #3ba85a;
+  --color-ed-teal-light: #4ec06a;
+  --color-ed-burnt: #e06820;
+  --color-ed-burnt-light: #ff8a50;
+  --color-ed-card: #fffef8;
+  --color-ed-card-hover: #fefcf0;
+  --color-ed-border: #b8d89c;
+  --color-ed-border-dark: #98c47c;
+  --color-ed-success: #2d8a47;
+  --color-ed-error: #d94040;
+
+  /* Keep old names as aliases for gradual migration */
+  --color-cyber-cyan: #3ba85a;
+  --color-cyber-magenta: #e06820;
+  --color-cyber-green: #2d8a47;
+  --color-cyber-purple: #7c6dd8;
+  --color-cyber-dark: #e8f5d8;
+  --color-cyber-card: #fffef8;
+  --color-cyber-card-hover: #fefcf0;
+  --color-cyber-border: #b8d89c;
+
+  /* Fonts */
+  --font-display: 'Nunito', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Nunito', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ── Base ── */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(180deg, #d4f5e9 0%, #e0f5d0 25%, #e8f5d8 50%, #f0f5d0 75%, #fef9e7 100%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* ── Display Font Utility ── */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+/* ── Accent Lines ── */
+.accent-line-teal {
+  background: linear-gradient(90deg, transparent, var(--teal), transparent);
+}
+.accent-line-burnt {
+  background: linear-gradient(90deg, transparent, var(--burnt), transparent);
+}
+
+/* ── Card Styles — raised "game button" look ── */
+.ed-card {
+  background: var(--card-bg);
+  border: 3px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 0 #a8cc88;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.ed-card:hover {
+  box-shadow: 0 2px 0 #a8cc88;
+  transform: translateY(2px);
+}
+
+.ed-card-dark {
+  background: #2d5016;
+  border: 3px solid #3d6826;
+  border-radius: 16px;
+  color: #e2f5d0;
+  box-shadow: 0 4px 0 #1e3a12;
+}
+
+/* ── Glow Utilities (now warm game-world shadows) ── */
+.glow-cyan {
+  box-shadow: 0 4px 0 #2d8a47, 0 2px 12px rgba(59, 168, 90, 0.2);
+}
+.glow-magenta {
+  box-shadow: 0 4px 0 #c44d20, 0 2px 12px rgba(224, 104, 32, 0.2);
+}
+.glow-green {
+  box-shadow: 0 4px 0 #1e6635, 0 2px 12px rgba(45, 138, 71, 0.2);
+}
+.glow-purple {
+  box-shadow: 0 4px 0 #5a4db8, 0 2px 12px rgba(124, 109, 216, 0.2);
+}
+
+/* ── Text Accent Colors ── */
+.text-glow-cyan {
+  color: var(--teal);
+}
+.text-glow-magenta {
+  color: var(--burnt);
+}
+
+/* ── Background Pattern (subtle grass/meadow dots) ── */
+.bg-grid {
+  background-image:
+    radial-gradient(circle, rgba(59, 168, 90, 0.06) 1px, transparent 1px),
+    radial-gradient(circle, rgba(59, 168, 90, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px, 20px 20px;
+  background-position: 0 0, 10px 10px;
+  animation: none;
+}
+
+/* ── Gradient Text ── */
+.gradient-text-cyber {
+  background: linear-gradient(135deg, var(--teal), var(--burnt));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--parchment);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #88b870;
+}
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--card-border) var(--parchment);
+}
+
+/* ── Thin Scrollbar for Content Cards ── */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 5px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 3px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #88b870;
+}
+
+/* ── Pulse Animation ── */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+/* ── Typewriter ── */
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50% { border-color: var(--teal); }
+}
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid var(--teal);
+  animation: typewriter 2.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+/* ── Dark sections (for header, code blocks) ── */
+.ed-dark-section {
+  background: linear-gradient(135deg, #2d5016, #1e3a12);
+  color: #e2f5d0;
 }

@@ -1,0 +1,33 @@
+{
+  "jobs": 4,
+  "tasks": [
+    {
+      "id": "room-beginner",
+      "prompt": "Wide-angle illustration of a modern corporate IT room interior. Warm lighting, wooden desks with computer monitors, a whiteboard on the wall, filing cabinets, a desk phone, a locked safe in the corner, and a door. Slightly stylized editorial illustration style with clean lines and warm tones. No people. Atmospheric and inviting. 16:9 aspect ratio.",
+      "image": "room-beginner.png",
+      "ar": "16:9",
+      "quality": "2k"
+    },
+    {
+      "id": "room-intermediate",
+      "prompt": "Wide-angle illustration of a corporate HR department office interior. Neutral professional tones, filing cabinets with folders, a computer workstation, a whiteboard with charts, a desk phone, a small safe, and an office door. Slightly stylized editorial illustration with clean lines. No people. Professional and organized feel. 16:9 aspect ratio.",
+      "image": "room-intermediate.png",
+      "ar": "16:9",
+      "quality": "2k"
+    },
+    {
+      "id": "room-advanced",
+      "prompt": "Wide-angle illustration of a dark server room interior. Rack servers with blinking LED lights, cables running along the ceiling, cool blue and green ambient lighting, a security dashboard screen on the wall, a terminal workstation, a locked emergency console, and a heavy metal door. Slightly stylized editorial illustration. Dramatic and tense atmosphere. No people. 16:9 aspect ratio.",
+      "image": "room-advanced.png",
+      "ar": "16:9",
+      "quality": "2k"
+    },
+    {
+      "id": "room-expert",
+      "prompt": "Wide-angle illustration of a futuristic AI control center interior. Holographic displays floating in the air, a command console with glowing screens, a large brain-shaped AI visualization on a monitor wall, dramatic red and amber warning lights, an override panel, and a sealed blast door. Slightly stylized editorial illustration. Ominous and high-tech atmosphere. No people. 16:9 aspect ratio.",
+      "image": "room-expert.png",
+      "ar": "16:9",
+      "quality": "2k"
+    }
+  ]
+}

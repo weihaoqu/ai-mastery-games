@@ -1,0 +1,1 @@
+A small ceramic bowl of clear dashi broth in a dimly lit Japanese restaurant with wooden beams. Chopsticks on a ceramic rest, a sake cup nearby. Warm candlelight atmosphere. Slightly blurry, taken at an angle with a phone in low light. A cloth napkin edge visible. Intimate, authentic dining moment.

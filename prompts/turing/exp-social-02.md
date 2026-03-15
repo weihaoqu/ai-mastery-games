@@ -1,0 +1,1 @@
+A laptop with stickers on the lid at a coffee shop table, viewed from above-left. Next to it: a cup of black coffee and a small open notebook with handwritten notes. Blurred warm background showing other coffee shop patrons. Casual, authentic feel of a freelancer working at their favorite cafe.

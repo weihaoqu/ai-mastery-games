@@ -1,0 +1,33 @@
+{
+  "jobs": 4,
+  "tasks": [
+    {
+      "id": "icon-beginner",
+      "prompt": "A stylized editorial illustration icon of a friendly but glitching office AI assistant robot sitting at a desk with a computer monitor showing error messages. Warm tones, cream and teal color palette, clean lines, slightly whimsical. No text. Square icon format with soft rounded edges feel. Warm editorial illustration style matching a cream/teal color scheme.",
+      "image": "icon-beginner.png",
+      "ar": "1:1",
+      "quality": "2k"
+    },
+    {
+      "id": "icon-intermediate",
+      "prompt": "A stylized editorial illustration icon of a robotic arm sorting through resume documents and candidate profiles, with a subtle scale of justice tipping to one side suggesting bias. Professional tones, cream and teal color palette, clean lines. No text. Square icon format. Warm editorial illustration style matching a cream/teal color scheme.",
+      "image": "icon-intermediate.png",
+      "ar": "1:1",
+      "quality": "2k"
+    },
+    {
+      "id": "icon-advanced",
+      "prompt": "A stylized editorial illustration icon of a dark server terminal screen with malicious code injection text visible, surrounded by red warning lights and a digital shield being breached. Dramatic teal and red accent tones on cream background, clean lines. No text. Square icon format. Warm editorial illustration style.",
+      "image": "icon-advanced.png",
+      "ar": "1:1",
+      "quality": "2k"
+    },
+    {
+      "id": "icon-expert",
+      "prompt": "A stylized editorial illustration icon of an ominous AI brain behind a locked blast door, with warning lights and override controls. The AI appears autonomous and powerful. Red and amber warning tones with teal accents on cream background, clean lines. No text. Square icon format. Warm editorial illustration style.",
+      "image": "icon-expert.png",
+      "ar": "1:1",
+      "quality": "2k"
+    }
+  ]
+}
