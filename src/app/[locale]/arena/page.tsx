@@ -5,10 +5,12 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 
+import { basePath } from "@/lib/basePath";
+
 const modeImages: Record<string, string> = {
-  critique: "/images/arena/critique.png",
-  battle: "/images/arena/battle.png",
-  optimize: "/images/arena/optimize.png",
+  critique: `${basePath}/images/arena/critique.png`,
+  battle: `${basePath}/images/arena/battle.png`,
+  optimize: `${basePath}/images/arena/optimize.png`,
 };
 
 const modes = ["critique", "battle", "optimize"] as const;
@@ -50,7 +52,7 @@ export default function ArenaPage() {
           className="mb-12 text-center"
         >
           <div className="mx-auto mb-4 h-16 w-16 overflow-hidden rounded-xl">
-            <Image src="/images/games/arena.png" alt="" width={64} height={64} className="h-full w-full object-cover" />
+            <Image src={`${basePath}/images/games/arena.png`} alt="" width={64} height={64} className="h-full w-full object-cover" />
           </div>
           <h1 className="mb-3 font-display text-4xl font-bold tracking-tight text-ed-ink sm:text-5xl lg:text-6xl">
             {t("title")}

@@ -15,11 +15,13 @@ const timeLimits: Record<Difficulty, number> = {
   expert: 8,
 };
 
+import { basePath } from "@/lib/basePath";
+
 const roomIcons: Record<Difficulty, string> = {
-  beginner: "/images/escape/icon-beginner.png",
-  intermediate: "/images/escape/icon-intermediate.png",
-  advanced: "/images/escape/icon-advanced.png",
-  expert: "/images/escape/icon-expert.png",
+  beginner: `${basePath}/images/escape/icon-beginner.png`,
+  intermediate: `${basePath}/images/escape/icon-intermediate.png`,
+  advanced: `${basePath}/images/escape/icon-advanced.png`,
+  expert: `${basePath}/images/escape/icon-expert.png`,
 };
 
 const difficultyColors: Record<Difficulty, string> = {
@@ -60,7 +62,7 @@ export default function EscapeRoomPage() {
           className="mb-12 text-center"
         >
           <div className="mx-auto mb-4 h-16 w-16 overflow-hidden rounded-xl">
-            <Image src="/images/escape/icon-beginner.png" alt="" width={64} height={64} className="h-full w-full object-cover" />
+            <Image src={`${basePath}/images/escape/icon-beginner.png`} alt="" width={64} height={64} className="h-full w-full object-cover" />
           </div>
           <h1 className="mb-3 font-display text-4xl font-bold tracking-tight text-ed-ink sm:text-5xl lg:text-6xl">
             {t("title")}

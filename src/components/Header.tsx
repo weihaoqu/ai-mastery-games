@@ -9,11 +9,11 @@ import type { Locale } from "@/i18n/config";
 import { basePath } from "@/lib/basePath";
 
 const gameNav = [
-  { key: "detective", href: "/detective", icon: "/images/games/detective.png" },
-  { key: "arena", href: "/arena", icon: "/images/games/arena.png" },
-  { key: "turing", href: "/turing", icon: "/images/games/turing.png" },
-  { key: "escape", href: "/escape-room", icon: "/images/escape/icon-beginner.png" },
-] as const;
+  { key: "detective", href: "/detective", icon: `${basePath}/images/games/detective.png` },
+  { key: "arena", href: "/arena", icon: `${basePath}/images/games/arena.png` },
+  { key: "turing", href: "/turing", icon: `${basePath}/images/games/turing.png` },
+  { key: "escape", href: "/escape-room", icon: `${basePath}/images/escape/icon-beginner.png` },
+];
 
 export default function Header() {
   const locale = useLocale();

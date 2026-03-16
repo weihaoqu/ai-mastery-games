@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Header from "@/components/Header";
 import GameCard from "@/components/GameCard";
 import PlayerProgress from "@/components/PlayerProgress";
+import { basePath } from "@/lib/basePath";
 
 const gameKeys = ["detective", "arena", "turing", "escape"] as const;
 
@@ -12,10 +13,10 @@ const gameConfig: Record<
   (typeof gameKeys)[number],
   { href: string; comingSoon?: boolean; accentColor: "cyan" | "magenta" | "green" | "purple"; iconSrc: string }
 > = {
-  detective: { href: "/detective", accentColor: "cyan", iconSrc: "/images/games/detective.png" },
-  arena: { href: "/arena", accentColor: "magenta", iconSrc: "/images/games/arena.png" },
-  turing: { href: "/turing", accentColor: "green", iconSrc: "/images/games/turing.png" },
-  escape: { href: "/escape-room", accentColor: "purple", iconSrc: "/images/escape/icon-beginner.png" },
+  detective: { href: "/detective", accentColor: "cyan", iconSrc: `${basePath}/images/games/detective.png` },
+  arena: { href: "/arena", accentColor: "magenta", iconSrc: `${basePath}/images/games/arena.png` },
+  turing: { href: "/turing", accentColor: "green", iconSrc: `${basePath}/images/games/turing.png` },
+  escape: { href: "/escape-room", accentColor: "purple", iconSrc: `${basePath}/images/escape/icon-beginner.png` },
 };
 
 export default function Home() {

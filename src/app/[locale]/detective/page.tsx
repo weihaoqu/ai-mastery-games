@@ -5,11 +5,13 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 
+import { basePath } from "@/lib/basePath";
+
 const tierImages: Record<string, string> = {
-  beginner: "/images/tiers/beginner.png",
-  intermediate: "/images/tiers/intermediate.png",
-  advanced: "/images/tiers/advanced.png",
-  expert: "/images/tiers/expert.png",
+  beginner: `${basePath}/images/tiers/beginner.png`,
+  intermediate: `${basePath}/images/tiers/intermediate.png`,
+  advanced: `${basePath}/images/tiers/advanced.png`,
+  expert: `${basePath}/images/tiers/expert.png`,
 };
 
 const tierKeys = ["beginner", "intermediate", "advanced", "expert"] as const;
@@ -79,7 +81,7 @@ export default function DetectivePage() {
           className="mb-12 text-center"
         >
           <div className="mx-auto mb-4 h-16 w-16 overflow-hidden rounded-xl">
-            <Image src="/images/games/detective.png" alt="" width={64} height={64} className="h-full w-full object-cover" />
+            <Image src={`${basePath}/images/games/detective.png`} alt="" width={64} height={64} className="h-full w-full object-cover" />
           </div>
           <h1 className="mb-3 font-display text-4xl font-bold tracking-tight text-ed-ink sm:text-5xl lg:text-6xl">
             {t("title")}
