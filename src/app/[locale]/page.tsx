@@ -100,6 +100,34 @@ export default function Home() {
           })}
         </motion.section>
 
+        {/* AI IQ Test Link */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="mb-20"
+        >
+          <a
+            href="/ai-iq-test/"
+            className="group flex items-center justify-between rounded-2xl border-3 border-[#ffe066] bg-gradient-to-r from-[#fffbea] to-[#fff3c4] p-6 shadow-[0_4px_0_#e6c84a] transition-all duration-200 hover:translate-y-[2px] hover:shadow-[0_2px_0_#e6c84a]"
+          >
+            <div className="flex items-center gap-4">
+              <span className="text-4xl">🧠</span>
+              <div>
+                <h3 className="font-display text-xl text-[#7a5d00]">
+                  AI IQ Test
+                </h3>
+                <p className="text-sm text-[#a08020]">
+                  {tHub("aiIqTestDesc")}
+                </p>
+              </div>
+            </div>
+            <span className="text-2xl text-[#c4a020] transition-transform group-hover:translate-x-1">
+              →
+            </span>
+          </a>
+        </motion.section>
+
         {/* Stats Section */}
         <motion.section
           initial={{ opacity: 0 }}

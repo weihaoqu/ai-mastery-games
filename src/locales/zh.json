@@ -3,6 +3,7 @@
     "title": "AI 精通挑战",
     "subtitle": "通过4个互动挑战测试你的AI能力",
     "stats": "{games} 个游戏 · {dimensions} 个技能维度 · {levels} 个难度等级",
+    "aiIqTestDesc": "快速测验，衡量你的AI知识水平",
     "comingSoon": "即将推出"
   },
   "progress": {
