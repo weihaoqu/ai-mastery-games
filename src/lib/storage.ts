@@ -45,7 +45,7 @@ export function saveSession(session: SessionResult): void {
   data.sessions.push(session);
   saveStorageData(data);
 
-  // Also submit to server API (best effort)
+  // Also submit to server API (best effort, fire-and-forget)
   try {
     fetch(`${basePath}/api/scores`, {
       method: "POST",
@@ -57,6 +57,14 @@ export function saveSession(session: SessionResult): void {
         score: session.overallScore,
         dimensions: session.dimensions,
         masteryLevel: session.masteryLevel,
+        cases: session.cases.map((c) => ({
+          caseId: c.caseId,
+          caseTitle: c.caseTitle,
+          caseType: c.caseType,
+          isCorrect: c.isCorrect,
+          score: c.score,
+          timeSpent: c.timeSpent,
+        })),
       }),
     });
   } catch {
