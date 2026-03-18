@@ -15,6 +15,7 @@ import { scorePuzzle, calculateEscapeSessionResult } from "@/lib/escape/scoring"
 import { generateId } from "@/lib/storage";
 import { playCorrect, playWrong, playCollect, playTick } from "@/lib/sounds";
 import { EscapeRoomSkeleton } from "@/components/Skeleton";
+import { basePath } from "@/lib/basePath";
 import TimerBar from "@/components/escape/TimerBar";
 import RoomView from "@/components/escape/RoomView";
 import PuzzleModal from "@/components/escape/PuzzleModal";
@@ -358,7 +359,7 @@ function PlayInner() {
       <div className="sticky top-0 z-30 border-b border-ed-border bg-ed-cream/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3">
           <a
-            href={`/${locale}/escape-room`}
+            href={`${basePath}/${locale}/escape-room`}
             className="shrink-0 text-sm text-ed-ink-muted transition-colors hover:text-ed-teal"
           >
             &larr; {t("backToHub")}

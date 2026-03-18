@@ -12,6 +12,7 @@ import type {
   OptimizeChallenge,
   Difficulty,
 } from "@/lib/types";
+import { basePath } from "@/lib/basePath";
 import {
   scoreCritiqueRound,
   scoreBattleRound,
@@ -348,7 +349,7 @@ function PlayInner() {
       <div className="sticky top-0 z-30 border-b border-ed-border bg-ed-cream/90 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
           <a
-            href={`/${locale}/arena`}
+            href={`${basePath}/${locale}/arena`}
             className="text-sm text-ed-ink-muted transition-colors hover:text-ed-teal"
           >
             &larr; {t("backToArena")}

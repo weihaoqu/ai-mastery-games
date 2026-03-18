@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import type { EscapeRoom, EscapeAnswer } from "@/lib/types";
+import { basePath } from "@/lib/basePath";
 
 interface RoomViewProps {
   room: EscapeRoom;
@@ -46,7 +47,7 @@ export default function RoomView({
         cursor: "crosshair",
         ...(hasBackground
           ? {
-              backgroundImage: `url(${room.backgroundImage})`,
+              backgroundImage: `url(${basePath}${room.backgroundImage})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }
