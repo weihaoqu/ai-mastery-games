@@ -56,8 +56,8 @@ export default function ShareButton({
         onClick={handleCopy}
         className={`rounded-lg border px-4 py-3 text-center text-sm font-semibold transition-all ${
           copied
-            ? "border-ed-success/40 bg-ed-success/10 text-ed-success"
-            : "border-ed-border bg-ed-card text-ed-ink-muted hover:bg-ed-warm"
+            ? "border-primary/40 bg-primary/10 text-primary"
+            : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low"
         }`}
       >
         {copied ? t("copied") : t("copyScore")}
@@ -66,7 +66,7 @@ export default function ShareButton({
       {/* Twitter/X */}
       <button
         onClick={handleTwitter}
-        className="rounded-lg border border-ed-border bg-ed-card px-3 py-3 text-sm text-ed-ink-muted transition-colors hover:bg-ed-warm"
+        className="rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 text-sm text-on-surface-variant transition-colors hover:bg-surface-container-low"
         aria-label={t("shareTwitter")}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -77,7 +77,7 @@ export default function ShareButton({
       {/* LinkedIn */}
       <button
         onClick={handleLinkedIn}
-        className="rounded-lg border border-ed-border bg-ed-card px-3 py-3 text-sm text-ed-ink-muted transition-colors hover:bg-ed-warm"
+        className="rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3 text-sm text-on-surface-variant transition-colors hover:bg-surface-container-low"
         aria-label={t("shareLinkedIn")}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">

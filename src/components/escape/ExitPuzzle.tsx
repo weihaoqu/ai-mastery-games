@@ -34,7 +34,6 @@ export default function ExitPuzzleComponent({
       setTimeout(() => onSolve(true), 1200);
     } else {
       setResult("incorrect");
-      // Allow retry after brief flash
       setTimeout(() => {
         setResult(null);
         setSelected(null);
@@ -43,37 +42,37 @@ export default function ExitPuzzleComponent({
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* Collected codes */}
-      <div className="rounded-lg border border-ed-border bg-ed-parchment p-4">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ed-ink-muted">
+    <div className="flex flex-col gap-6">
+      {/* Collected codes display */}
+      <div className="text-center space-y-3">
+        <p className="font-body text-base font-medium text-on-surface-variant">
           {t("codesCollected")}
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex justify-center gap-3">
           {collectedCodes.map((code, i) => (
-            <span
+            <div
               key={i}
-              className="rounded-full bg-ed-teal/10 px-3 py-1 font-mono text-xs font-bold text-ed-teal"
+              className="w-14 h-16 bg-surface-container rounded-xl border-b-4 border-outline-variant flex items-center justify-center text-2xl font-headline font-extrabold text-primary"
             >
               {code}
-            </span>
+            </div>
           ))}
           {codesNeeded > 0 &&
             Array.from({ length: codesNeeded }).map((_, i) => (
-              <span
+              <div
                 key={`empty-${i}`}
-                className="rounded-full border border-dashed border-ed-border px-3 py-1 font-mono text-xs text-ed-ink-muted"
+                className="w-14 h-16 bg-surface-container-lowest rounded-xl border-2 border-dashed border-outline-variant flex items-center justify-center"
               >
-                ???
-              </span>
+                <div className="w-1.5 h-6 bg-primary animate-pulse rounded-full" />
+              </div>
             ))}
         </div>
       </div>
 
       {/* Not enough codes */}
       {!allCollected && (
-        <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-center">
-          <p className="text-sm text-amber-700">
+        <div className="rounded-xl border-2 border-secondary-container bg-secondary-container/30 p-5 text-center">
+          <p className="text-sm text-on-secondary-container font-label font-bold">
             {t("needMoreCodes", { count: codesNeeded })}
           </p>
         </div>
@@ -82,17 +81,18 @@ export default function ExitPuzzleComponent({
       {/* Final challenge */}
       {allCollected && (
         <>
-          <div className="rounded-lg border border-ed-teal/30 bg-ed-teal/5 p-4">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-ed-teal">
-              {t("finalChallenge")}
-            </p>
-            <p className="text-sm leading-relaxed text-ed-ink">
+          <div className="rounded-xl border-2 border-tertiary/30 bg-tertiary-container/20 p-5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-tertiary-container/30 text-tertiary rounded-full mb-3">
+              <span className="material-symbols-outlined text-sm">info</span>
+              <span className="font-label text-xs uppercase tracking-widest font-bold">{t("finalChallenge")}</span>
+            </div>
+            <p className="text-sm leading-relaxed text-on-surface font-medium">
               {puzzle.finalQuestion}
             </p>
           </div>
 
           {/* Options */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             {puzzle.finalOptions.map((option, idx) => {
               const isSelected = selected === idx;
               const isCorrectOption = idx === puzzle.correctIndex;
@@ -108,15 +108,15 @@ export default function ExitPuzzleComponent({
                   whileHover={
                     result !== "correct" ? { scale: 1.01 } : undefined
                   }
-                  className={`w-full rounded-lg border p-3 text-left text-sm transition-all ${
+                  className={`w-full rounded-xl border-b-4 p-4 text-left text-sm font-medium transition-all ${
                     showCorrect
-                      ? "border-ed-success/40 bg-ed-success/10 text-ed-success"
+                      ? "border-primary/40 bg-primary-container/30 text-primary"
                       : showError
-                        ? "border-ed-error/40 bg-ed-error/10 text-ed-error"
-                        : "border-ed-border bg-ed-card hover:border-ed-teal/30 hover:bg-ed-teal/5"
+                        ? "border-error/40 bg-error/10 text-error"
+                        : "border-outline-variant bg-surface-container-lowest hover:border-primary/30 hover:bg-surface-container-low"
                   } disabled:cursor-default`}
                 >
-                  <span className="mr-2 font-mono text-xs text-ed-ink-muted">
+                  <span className="mr-2 font-mono text-xs text-on-surface-variant">
                     {String.fromCharCode(65 + idx)}.
                   </span>
                   {option}
@@ -131,12 +131,12 @@ export default function ExitPuzzleComponent({
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="rounded-lg border border-ed-success/30 bg-ed-success/5 p-4 text-center"
+                className="rounded-xl border-2 border-primary/30 bg-primary-container/30 p-5 text-center"
               >
-                <p className="text-lg font-bold text-ed-success">
+                <p className="text-xl font-headline font-extrabold text-primary">
                   {t("correct")}
                 </p>
-                <p className="mt-1 text-sm text-ed-ink">{puzzle.explanation}</p>
+                <p className="mt-2 text-sm text-on-surface">{puzzle.explanation}</p>
               </motion.div>
             )}
             {result === "incorrect" && (
@@ -144,9 +144,9 @@ export default function ExitPuzzleComponent({
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="rounded-lg border border-ed-error/30 bg-ed-error/5 p-3 text-center"
+                className="rounded-xl border-2 border-error/30 bg-error/5 p-4 text-center"
               >
-                <p className="text-sm text-ed-error">{t("incorrect")}</p>
+                <p className="text-sm font-bold text-error">{t("incorrect")}</p>
               </motion.div>
             )}
           </AnimatePresence>

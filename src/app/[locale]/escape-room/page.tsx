@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import type { Difficulty } from "@/lib/types";
+import Header from "@/components/Header";
+import { track } from "@/lib/analytics";
 
 const difficulties: Difficulty[] = ["beginner", "intermediate", "advanced", "expert"];
 
@@ -15,20 +16,35 @@ const timeLimits: Record<Difficulty, number> = {
   expert: 8,
 };
 
-import { basePath } from "@/lib/basePath";
-
-const roomIcons: Record<Difficulty, string> = {
-  beginner: `${basePath}/images/escape/icon-beginner.png`,
-  intermediate: `${basePath}/images/escape/icon-intermediate.png`,
-  advanced: `${basePath}/images/escape/icon-advanced.png`,
-  expert: `${basePath}/images/escape/icon-expert.png`,
-};
-
-const difficultyColors: Record<Difficulty, string> = {
-  beginner: "bg-emerald-100 text-emerald-700",
-  intermediate: "bg-amber-100 text-amber-700",
-  advanced: "bg-orange-100 text-orange-700",
-  expert: "bg-red-100 text-red-700",
+const tierConfig: Record<Difficulty, { emoji: string; tier: string; tagColor: string; tagLabel: string; btnBg: string }> = {
+  beginner: {
+    emoji: "🌱",
+    tier: "TIER 01",
+    tagColor: "text-primary",
+    tagLabel: "Warm up",
+    btnBg: "bg-primary text-on-primary shadow-[4px_4px_0_0_#004c1e]",
+  },
+  intermediate: {
+    emoji: "📚",
+    tier: "TIER 02",
+    tagColor: "text-tertiary",
+    tagLabel: "Puzzle solver",
+    btnBg: "bg-tertiary text-on-tertiary shadow-[4px_4px_0_0_#2f1887]",
+  },
+  advanced: {
+    emoji: "⚡",
+    tier: "TIER 03",
+    tagColor: "text-secondary",
+    tagLabel: "Code breaker",
+    btnBg: "bg-secondary text-on-secondary shadow-[4px_4px_0_0_#5c2300]",
+  },
+  expert: {
+    emoji: "🔥",
+    tier: "TIER 04",
+    tagColor: "text-error",
+    tagLabel: "Master escape",
+    btnBg: "bg-error text-on-error shadow-[4px_4px_0_0_#520c00]",
+  },
 };
 
 const containerVariants = {
@@ -46,79 +62,71 @@ export default function EscapeRoomPage() {
   const tScenario = useTranslations("escapeScenario");
 
   return (
-    <div className="min-h-screen bg-ed-cream">
-      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-ed-ink-muted transition-colors hover:text-ed-teal"
-        >
-          <span>&larr;</span> {t("backToHub")}
-        </Link>
-
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-12 text-center"
-        >
-          <div className="mx-auto mb-4 h-16 w-16 overflow-hidden rounded-xl">
-            <Image src={`${basePath}/images/escape/icon-beginner.png`} alt="" width={64} height={64} className="h-full w-full object-cover" />
+    <>
+      <Header />
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pt-20 sm:pt-24">
+        {/* Header */}
+        <section className="flex flex-col items-center text-center mb-16">
+          <div className="mb-6 p-6 bg-surface-container-highest rounded-3xl shadow-[4px_4px_0_0_#98b67d] relative">
+            <span className="material-symbols-outlined text-tertiary text-4xl sm:text-6xl" style={{ fontVariationSettings: "'opsz' 48" }}>lock</span>
           </div>
-          <h1 className="mb-3 font-display text-4xl font-bold tracking-tight text-ed-ink sm:text-5xl lg:text-6xl">
+          <h1 className="font-headline text-3xl sm:text-5xl md:text-6xl font-extrabold text-on-surface tracking-tight mb-4">
             {t("title")}
           </h1>
-          <p className="text-lg text-ed-ink-muted sm:text-xl">{t("subtitle")}</p>
-        </motion.div>
+          <p className="max-w-2xl text-on-surface-variant text-lg font-body leading-relaxed">
+            {t("subtitle")}
+          </p>
+        </section>
 
+        {/* Difficulty Grid */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 gap-5 sm:grid-cols-2"
+          className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20"
         >
-          {difficulties.map((difficulty) => (
-            <Link key={difficulty} href={`/escape-room/play?difficulty=${difficulty}`}>
-              <motion.div
-                variants={cardVariants}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                className="relative rounded-xl border border-ed-border bg-ed-card p-6 transition-colors hover:border-ed-teal/40 hover:shadow-md cursor-pointer sm:p-8"
-              >
-                {/* Difficulty badge */}
-                <span
-                  className={`absolute top-4 right-4 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${difficultyColors[difficulty]}`}
+          {difficulties.map((difficulty) => {
+            const tier = tierConfig[difficulty];
+            return (
+              <Link key={difficulty} href={`/escape-room/play?difficulty=${difficulty}`} onClick={() => track('difficulty_select', { game: 'escape', difficulty })}>
+                <motion.div
+                  variants={cardVariants}
+                  className="tactile-card group bg-surface-container-lowest p-8 rounded-[2rem] border-2 border-outline-variant shadow-[6px_6px_0_0_#98b67d] hover:shadow-[2px_2px_0_0_#98b67d] hover:translate-x-[4px] hover:translate-y-[4px] cursor-pointer"
                 >
-                  {difficulty}
-                </span>
-
-                <div className="mb-3 overflow-hidden rounded-lg w-20 h-20 sm:w-24 sm:h-24">
-                  <Image
-                    src={roomIcons[difficulty]}
-                    alt={tScenario(difficulty)}
-                    width={96}
-                    height={96}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <h2 className="mb-1 font-display text-xl font-bold text-ed-ink">
-                  {tScenario(difficulty)}
-                </h2>
-                <p className="text-sm text-ed-ink-muted">{tScenario(`${difficulty}Desc`)}</p>
-
-                {/* Time limit badge */}
-                <div className="mt-4 flex items-center gap-3">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-ed-parchment px-3 py-1 text-xs font-medium text-ed-ink-muted">
-                    {"\u23F1\uFE0F"} {timeLimits[difficulty]} min
-                  </span>
-                  <span className="text-sm font-semibold text-ed-teal">
-                    {t("selectScenario")} &rarr;
-                  </span>
-                </div>
-              </motion.div>
-            </Link>
-          ))}
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="bg-surface-container p-4 rounded-2xl group-hover:bg-tertiary/10 transition-colors">
+                      <span className="text-4xl">{tier.emoji}</span>
+                    </div>
+                    <span className="font-label text-xs font-bold px-3 py-1 bg-surface-container text-on-surface-variant rounded-full tracking-widest uppercase">
+                      {tier.tier}
+                    </span>
+                  </div>
+                  <h3 className="font-headline text-2xl font-bold text-on-surface mb-2">
+                    {tScenario(difficulty)}
+                  </h3>
+                  <p className="font-body text-on-surface-variant mb-4 min-h-[48px]">
+                    {tScenario(`${difficulty}Desc`)}
+                  </p>
+                  {/* Time limit */}
+                  <div className="flex items-center gap-2 mb-6 text-on-surface-variant">
+                    <span className="material-symbols-outlined text-lg">timer</span>
+                    <span className="font-label text-xs font-bold">{timeLimits[difficulty]} MIN</span>
+                  </div>
+                  <div className="flex items-center justify-between mt-auto">
+                    <span className={`font-label text-sm font-semibold ${tier.tagColor}`}>
+                      {tier.tagLabel}
+                    </span>
+                    <span className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm ${tier.btnBg} hover:opacity-90 transition-all active:scale-95`}>
+                      {t("selectScenario") || "Enter"}
+                      <span className="material-symbols-outlined">arrow_forward</span>
+                    </span>
+                  </div>
+                </motion.div>
+              </Link>
+            );
+          })}
         </motion.div>
-      </div>
-    </div>
+      </main>
+    </>
   );
 }

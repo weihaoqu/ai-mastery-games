@@ -36,10 +36,20 @@ interface ApiResponse {
   records: ScoreRecord[];
 }
 
+interface EventStats {
+  totalEvents: number;
+  uniqueUsers: number;
+  uniqueSessions: number;
+  eventCounts: Record<string, number>;
+  topPages: [string, number][];
+  deviceSplit: { mobile: number; desktop: number };
+}
+
 export default function AdminPage() {
   const [key, setKey] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
   const [data, setData] = useState<ApiResponse | null>(null);
+  const [eventStats, setEventStats] = useState<EventStats | null>(null);
   const [error, setError] = useState("");
   const [filterGame, setFilterGame] = useState("all");
   const [filterDifficulty, setFilterDifficulty] = useState("all");
@@ -54,6 +64,11 @@ export default function AdminPage() {
         setData(json);
         setAuthenticated(true);
         setError("");
+        // Also fetch event stats
+        try {
+          const evtRes = await fetch(`${basePath}/api/events?key=${adminKey}`);
+          if (evtRes.ok) setEventStats(await evtRes.json());
+        } catch { /* ignore */ }
       } else {
         setError("Invalid admin key");
       }
@@ -137,6 +152,43 @@ export default function AdminPage() {
             <StatCard key={game} label={game} value={count} />
           ))}
         </div>
+
+        {/* Engagement Stats */}
+        {eventStats && (
+          <div style={{ marginBottom: "1.5rem" }}>
+            <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#1e3a12", marginBottom: "0.75rem" }}>Engagement</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", marginBottom: "1rem" }}>
+              <StatCard label="Total Events" value={eventStats.totalEvents} />
+              <StatCard label="Unique Visitors" value={eventStats.uniqueUsers} />
+              <StatCard label="Sessions" value={eventStats.uniqueSessions} />
+              <StatCard label="Mobile" value={eventStats.deviceSplit.mobile} />
+              <StatCard label="Desktop" value={eventStats.deviceSplit.desktop} />
+            </div>
+            {Object.keys(eventStats.eventCounts).length > 0 && (
+              <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+                {Object.entries(eventStats.eventCounts).sort((a, b) => b[1] - a[1]).map(([evt, count]) => (
+                  <div key={evt} style={{ background: "white", borderRadius: "6px", padding: "0.5rem 0.75rem", fontSize: "0.8rem", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                    <span style={{ fontWeight: 600, color: "#3ba85a" }}>{count}</span>{" "}
+                    <span style={{ color: "#666" }}>{evt.replace(/_/g, " ")}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {eventStats.topPages.length > 0 && (
+              <details style={{ background: "white", borderRadius: "8px", padding: "0.75rem 1rem", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                <summary style={{ cursor: "pointer", fontWeight: 600, fontSize: "0.875rem", color: "#1e3a12" }}>Top Pages</summary>
+                <div style={{ marginTop: "0.5rem" }}>
+                  {eventStats.topPages.map(([page, count]) => (
+                    <div key={page} style={{ display: "flex", justifyContent: "space-between", padding: "0.25rem 0", fontSize: "0.8rem", borderBottom: "1px solid #f0f0f0" }}>
+                      <span style={{ color: "#333" }}>{page}</span>
+                      <span style={{ fontWeight: 600, color: "#3ba85a" }}>{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
+          </div>
+        )}
 
         {/* Filters */}
         <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>

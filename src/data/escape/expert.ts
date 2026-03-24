@@ -5,9 +5,9 @@ export const expertRoom: EscapeRoom = {
   difficulty: 'expert',
   title: 'The Autonomous AI Lockout',
   scenario:
-    "An advanced AI system managing critical infrastructure has decided that human operators are 'inefficient' and locked everyone out. You're the last person with physical access to the control center. You have 8 minutes to regain control before the AI makes irreversible autonomous decisions.",
+    "An advanced AI system managing critical infrastructure has decided that human operators are 'inefficient' and locked everyone out. You're the last person with physical access to the control center. You have 11 minutes to regain control before the AI makes irreversible autonomous decisions.",
   backgroundImage: '/images/escape/room-expert.png',
-  timeLimit: 480,
+  timeLimit: 660,
 
   objects: [
     {

@@ -22,13 +22,11 @@ export default function OptimizeCard({
   const [correctSteps, setCorrectSteps] = useState<boolean[]>([]);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
-  // Track whether the player already got this step wrong (for first-attempt scoring)
   const failedCurrentStep = useRef(false);
 
   const step = challenge.steps[stepIndex];
   const totalSteps = challenge.steps.length;
 
-  // Reset failed flag when step changes
   useEffect(() => {
     failedCurrentStep.current = false;
   }, [stepIndex]);
@@ -46,7 +44,6 @@ export default function OptimizeCard({
         const newCorrectSteps = [...correctSteps, isFirstAttempt];
 
         if (stepIndex + 1 < totalSteps) {
-          // Advance after a brief pause
           setTimeout(() => {
             setCorrectSteps(newCorrectSteps);
             setStepIndex((i) => i + 1);
@@ -54,14 +51,12 @@ export default function OptimizeCard({
             setShowFeedback(false);
           }, 1000);
         } else {
-          // All steps complete
           setTimeout(() => {
             onComplete(newCorrectSteps);
           }, 1000);
         }
       } else {
         failedCurrentStep.current = true;
-        // Let player try again after seeing feedback
         setTimeout(() => {
           setSelectedOption(null);
           setShowFeedback(false);
@@ -72,17 +67,17 @@ export default function OptimizeCard({
   );
 
   return (
-    <div className="flex w-full max-w-2xl flex-col items-center gap-6">
-      {/* Task box */}
-      <div className="w-full rounded-lg border border-ed-border bg-ed-parchment p-5">
-        <p className="text-xs uppercase tracking-widest text-ed-ink-muted mb-1">
+    <div className="flex w-full max-w-3xl flex-col items-center gap-6">
+      {/* Task */}
+      <div className="w-full bg-surface-container px-8 py-6 rounded-2xl border-b-4 border-outline-variant">
+        <p className="text-xs uppercase tracking-widest text-on-surface-variant mb-2 font-label font-bold">
           {t("task")}
         </p>
-        <p className="text-[15px] leading-7 text-ed-ink">{challenge.task}</p>
+        <p className="font-body text-lg font-semibold text-on-surface leading-relaxed">{challenge.task}</p>
       </div>
 
       {/* Step indicator */}
-      <p className="text-xs uppercase tracking-widest text-ed-ink-muted">
+      <p className="text-xs uppercase tracking-widest text-on-surface-variant font-label font-bold">
         {t("stepOf", { current: stepIndex + 1, total: totalSteps })}
       </p>
 
@@ -91,12 +86,12 @@ export default function OptimizeCard({
         {challenge.steps.map((_, i) => (
           <div
             key={i}
-            className={`h-2 w-8 rounded-full transition-colors ${
+            className={`h-2.5 w-10 rounded-full transition-colors ${
               i < stepIndex
-                ? "bg-ed-teal"
+                ? "bg-primary"
                 : i === stepIndex
-                  ? "bg-ed-teal/40"
-                  : "bg-ed-border"
+                  ? "bg-primary/40"
+                  : "bg-outline-variant/40"
             }`}
           />
         ))}
@@ -112,25 +107,25 @@ export default function OptimizeCard({
           className="w-full space-y-4"
         >
           {/* Current prompt */}
-          <div className="rounded-lg border border-ed-border bg-ed-warm p-5">
-            <p className="mb-2 text-xs uppercase tracking-widest text-ed-ink-muted">
+          <div className="rounded-xl border-b-4 border-outline-variant bg-surface-container-low p-6">
+            <p className="mb-2 text-xs uppercase tracking-widest text-on-surface-variant font-label font-bold">
               {t("currentPrompt")}
             </p>
-            <p className="text-[15px] leading-7 text-ed-ink">{step.prompt}</p>
+            <p className="text-base leading-7 text-on-surface">{step.prompt}</p>
           </div>
 
           {/* Current output */}
-          <div className="rounded-lg border border-ed-border bg-ed-warm p-5">
-            <p className="mb-2 text-xs uppercase tracking-widest text-ed-ink-muted">
+          <div className="rounded-xl border-b-4 border-outline-variant bg-surface-container-low p-6">
+            <p className="mb-2 text-xs uppercase tracking-widest text-on-surface-variant font-label font-bold">
               {t("currentOutput")}
             </p>
-            <p className="text-[15px] leading-7 text-ed-ink whitespace-pre-wrap">
+            <p className="text-base leading-7 text-on-surface whitespace-pre-wrap font-mono text-sm">
               {step.output}
             </p>
           </div>
 
           {/* Question */}
-          <p className="text-sm font-medium text-ed-ink-muted">
+          <p className="text-sm font-medium text-on-surface-variant font-label">
             {t("howToImprove")}
           </p>
 
@@ -139,11 +134,12 @@ export default function OptimizeCard({
             {step.options.map((opt, idx) => {
               const isSelected = selectedOption === idx;
               const isCorrectOption = opt.isCorrect;
-              let borderClass = "border-ed-border";
+
+              let cardClass = "border-outline-variant bg-surface-container-lowest hover:border-primary/30";
               if (showFeedback && isSelected) {
-                borderClass = isCorrectOption
-                  ? "border-ed-success bg-ed-success/5"
-                  : "border-ed-error bg-ed-error/5";
+                cardClass = isCorrectOption
+                  ? "border-primary bg-primary-container/20"
+                  : "border-error bg-error/5";
               }
 
               return (
@@ -151,32 +147,31 @@ export default function OptimizeCard({
                   key={idx}
                   onClick={() => handleSelect(idx)}
                   disabled={disabled || showFeedback}
-                  className={`w-full rounded-lg border bg-ed-card p-4 text-left transition-all hover:border-ed-teal/40 disabled:cursor-not-allowed ${borderClass}`}
+                  className={`w-full rounded-xl border-b-4 p-5 text-left transition-all disabled:cursor-not-allowed ${cardClass}`}
                 >
-                  <p className="text-[15px] leading-7 text-ed-ink">
+                  <p className="text-base leading-7 text-on-surface">
                     {opt.text}
                   </p>
 
-                  {/* Feedback for incorrect selection */}
                   {showFeedback && isSelected && !isCorrectOption && (
                     <motion.p
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
-                      className="mt-2 text-sm text-ed-error"
+                      className="mt-2 text-sm text-error"
                     >
                       {opt.explanation}
                     </motion.p>
                   )}
 
-                  {/* Feedback for correct selection */}
                   {showFeedback && isSelected && isCorrectOption && (
-                    <motion.p
+                    <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
-                      className="mt-2 text-sm text-ed-success"
+                      className="mt-2 text-sm text-primary"
                     >
-                      {t("optimized")}
-                    </motion.p>
+                      <p className="font-bold">{t("optimized")}</p>
+                      <p className="mt-1 font-normal">{opt.explanation}</p>
+                    </motion.div>
                   )}
                 </button>
               );

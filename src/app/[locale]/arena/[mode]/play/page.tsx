@@ -43,6 +43,7 @@ import { intermediateOptimizeChallenges } from "@/data/arena/optimize/intermedia
 import { advancedOptimizeChallenges } from "@/data/arena/optimize/advanced";
 import { expertOptimizeChallenges } from "@/data/arena/optimize/expert";
 import { GamePlaySkeleton } from "@/components/Skeleton";
+import { trackGameStart, trackCaseAnswer, trackGameAbandon } from "@/lib/analytics";
 
 // --- Lookup tables ---
 
@@ -191,6 +192,7 @@ function PlayInner() {
     setItems(selected);
     sessionStorage.removeItem("arena-result");
     sessionStorage.removeItem(SAVE_KEY);
+    trackGameStart("arena", difficulty);
   }, [difficulty, mode, SAVE_KEY]);
 
   // Save progress
@@ -226,6 +228,32 @@ function PlayInner() {
     return () => window.removeEventListener("beforeunload", handler);
   }, [answers, phase]);
 
+  // Track game abandon on page leave
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+  const indexRef = useRef(index);
+  indexRef.current = index;
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+
+  useEffect(() => {
+    const handler = () => {
+      if (phaseRef.current !== "complete" && itemsRef.current.length > 0) {
+        const prog = Math.round((indexRef.current / itemsRef.current.length) * 100);
+        trackGameAbandon("arena", difficulty, prog);
+      }
+    };
+    const visibilityHandler = () => {
+      if (document.visibilityState === "hidden") handler();
+    };
+    window.addEventListener("beforeunload", handler);
+    document.addEventListener("visibilitychange", visibilityHandler);
+    return () => {
+      window.removeEventListener("beforeunload", handler);
+      document.removeEventListener("visibilitychange", visibilityHandler);
+    };
+  }, [difficulty]);
+
   const currentItem = items[index] as ArenaItem | undefined;
   const totalItems = items.length;
   const progress =
@@ -250,6 +278,7 @@ function PlayInner() {
       setStreak(answer.streak);
       setRevealState({ playerRanking });
       setPhase("reveal");
+      trackCaseAnswer("arena", currentItem.id, answer.isCorrect, 0);
     },
     [currentItem, phase, streak, mode]
   );
@@ -268,6 +297,7 @@ function PlayInner() {
       setStreak(answer.streak);
       setRevealState({ playerPick: pick });
       setPhase("reveal");
+      trackCaseAnswer("arena", currentItem.id, answer.isCorrect, 0);
     },
     [currentItem, phase, streak, mode]
   );
@@ -286,6 +316,7 @@ function PlayInner() {
       setStreak(answer.streak);
       setRevealState({ correctSteps });
       setPhase("reveal");
+      trackCaseAnswer("arena", currentItem.id, answer.isCorrect, 0);
     },
     [currentItem, phase, streak, mode]
   );
@@ -335,8 +366,8 @@ function PlayInner() {
 
   if (!currentItem) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-ed-cream">
-        <p className="text-ed-ink-muted animate-pulse">{t("shuffling")}</p>
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <p className="text-on-surface-variant animate-pulse">{t("shuffling")}</p>
       </div>
     );
   }
@@ -344,37 +375,37 @@ function PlayInner() {
   const revealData = getRevealData();
 
   return (
-    <div className="min-h-screen bg-ed-cream">
+    <div className="min-h-screen bg-surface">
       {/* Top bar */}
-      <div className="sticky top-0 z-30 border-b border-ed-border bg-ed-cream/90 backdrop-blur">
+      <div className="sticky top-0 z-30 border-b border-outline-variant bg-surface/90 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
           <a
             href={`${basePath}/${locale}/arena`}
-            className="text-sm text-ed-ink-muted transition-colors hover:text-ed-teal"
+            className="text-sm text-on-surface-variant transition-colors hover:text-primary"
           >
             &larr; {t("backToArena")}
           </a>
           <div className="flex items-center gap-4">
             {streak > 0 && (
               <span className="font-mono text-sm">
-                <span className="text-ed-burnt">{"\u{1F525}"}</span>{" "}
-                <span className="font-bold text-ed-teal">{streak}</span>
+                <span className="text-secondary">{"\u{1F525}"}</span>{" "}
+                <span className="font-bold text-primary">{streak}</span>
                 {streak >= 2 && (
-                  <span className="ml-1 text-xs text-ed-success">
+                  <span className="ml-1 text-xs text-primary">
                     x{[1, 1.5, 2, 2.5, 3][Math.min(streak - 1, 4)]}
                   </span>
                 )}
               </span>
             )}
-            <span className="text-xs font-semibold uppercase tracking-widest text-ed-ink-muted">
+            <span className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
               {t("roundOf", { current: index + 1, total: totalItems })}
             </span>
           </div>
           <span className="w-14" />
         </div>
-        <div className="h-0.5 bg-ed-border">
+        <div className="h-0.5 bg-outline-variant">
           <motion.div
-            className="h-full bg-ed-teal"
+            className="h-full bg-primary"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.4 }}

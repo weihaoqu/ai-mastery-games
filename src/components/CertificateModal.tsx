@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { generateCertificate, type CertificateData } from "@/lib/certificate";
 import type { SessionResult } from "@/lib/types";
+import { track } from "@/lib/analytics";
 
 interface CertificateModalProps {
   isOpen: boolean;
@@ -55,6 +56,9 @@ export default function CertificateModal({ isOpen, onClose, session }: Certifica
       };
 
       const blob = await generateCertificate(certData);
+
+      // Track certificate download
+      track("certificate_download", { game: session.game, score: session.overallScore, masteryLevel: session.masteryLevel });
 
       // Trigger download
       const url = URL.createObjectURL(blob);
@@ -113,32 +117,32 @@ export default function CertificateModal({ isOpen, onClose, session }: Certifica
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="mx-4 w-full max-w-md rounded-xl border border-ed-border bg-ed-card p-6 shadow-2xl"
+            className="mx-4 w-full max-w-md rounded-xl border border-outline-variant bg-surface-container-lowest p-6 shadow-2xl"
           >
             {/* Header */}
             <div className="mb-6 text-center">
-              <h2 className="mb-1 font-display text-xl font-bold text-ed-ink">{t("title")}</h2>
-              <p className="text-sm text-ed-ink-muted">{t("subtitle")}</p>
+              <h2 className="mb-1 font-headline text-xl font-bold text-on-surface">{t("title")}</h2>
+              <p className="text-sm text-on-surface-variant">{t("subtitle")}</p>
             </div>
 
             {/* Score preview */}
-            <div className="mb-6 flex items-center justify-center gap-6 rounded-lg border border-ed-border bg-ed-warm p-4">
+            <div className="mb-6 flex items-center justify-center gap-6 rounded-lg border border-outline-variant bg-surface-container-low p-4">
               <div className="text-center">
-                <p className="text-2xl font-bold text-ed-teal">{session.overallScore}</p>
-                <p className="text-[10px] uppercase tracking-wider text-ed-ink-muted">{t("score")}</p>
+                <p className="text-2xl font-bold text-primary">{session.overallScore}</p>
+                <p className="text-[10px] uppercase tracking-wider text-on-surface-variant">{t("score")}</p>
               </div>
-              <div className="h-8 w-px bg-ed-border" />
+              <div className="h-8 w-px bg-outline-variant" />
               <div className="text-center">
-                <p className="text-lg font-bold text-ed-burnt">
+                <p className="text-lg font-bold text-secondary">
                   {tMastery(session.masteryLevel)}
                 </p>
-                <p className="text-[10px] uppercase tracking-wider text-ed-ink-muted">{t("level")}</p>
+                <p className="text-[10px] uppercase tracking-wider text-on-surface-variant">{t("level")}</p>
               </div>
             </div>
 
             {/* Name input */}
             <div className="mb-4">
-              <label htmlFor="cert-name" className="mb-1.5 block text-sm font-medium text-ed-ink-light">
+              <label htmlFor="cert-name" className="mb-1.5 block text-sm font-medium text-on-surface-variant">
                 {t("nameLabel")}
               </label>
               <input
@@ -153,7 +157,7 @@ export default function CertificateModal({ isOpen, onClose, session }: Certifica
                   if (e.key === "Enter") handleGenerate();
                 }}
                 placeholder={t("namePlaceholder")}
-                className="w-full rounded-lg border border-ed-border bg-ed-warm px-4 py-2.5 text-ed-ink placeholder-ed-ink-muted/50 outline-none transition-colors focus:border-ed-teal"
+                className="w-full rounded-lg border border-outline-variant bg-surface-container-low px-4 py-2.5 text-on-surface placeholder-on-surface-variant/50 outline-none transition-colors focus:border-primary"
                 maxLength={50}
                 autoFocus
               />
@@ -164,14 +168,14 @@ export default function CertificateModal({ isOpen, onClose, session }: Certifica
             <div className="flex gap-3">
               <button
                 onClick={onClose}
-                className="flex-1 rounded-lg border border-ed-border bg-ed-warm px-4 py-2.5 text-sm font-semibold text-ed-ink-muted transition-colors hover:bg-ed-parchment"
+                className="flex-1 rounded-lg border border-outline-variant bg-surface-container-low px-4 py-2.5 text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container-highest"
               >
                 {t("cancel")}
               </button>
               <button
                 onClick={handleGenerate}
                 disabled={generating}
-                className="flex-1 rounded-lg bg-ed-teal/10 px-4 py-2.5 text-sm font-semibold text-ed-teal transition-colors hover:bg-ed-teal/20 disabled:opacity-50"
+                className="flex-1 rounded-lg bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 disabled:opacity-50"
               >
                 {generating ? t("generating") : t("generate")}
               </button>

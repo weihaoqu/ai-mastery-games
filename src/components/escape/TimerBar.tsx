@@ -24,30 +24,33 @@ export default function TimerBar({ totalSeconds, remainingSeconds, isPaused }: T
   let pulse = false;
 
   if (ratio > 0.5) {
-    barColor = "bg-ed-teal";
+    barColor = "bg-primary";
   } else if (ratio > 0.2) {
-    barColor = "bg-amber-500";
+    barColor = "bg-secondary";
   } else {
-    barColor = "bg-ed-error";
+    barColor = "bg-error";
     pulse = true;
   }
 
   return (
     <div className="w-full">
-      <div className="mb-1 flex items-center justify-between">
-        <span className="text-xs uppercase tracking-widest text-ed-ink-muted">
-          {t("timeRemaining")}
-        </span>
+      <div className="mb-2 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${ratio <= 0.2 ? "bg-error animate-pulse" : "bg-primary"}`} />
+          <span className="text-[10px] font-label uppercase tracking-widest text-on-surface-variant font-bold">
+            {t("timeRemaining")}
+          </span>
+        </div>
         <span
-          className={`font-mono text-sm font-bold ${
-            ratio <= 0.2 ? "text-ed-error" : "text-ed-ink"
+          className={`font-mono text-xl font-bold ${
+            ratio <= 0.2 ? "text-error" : "text-secondary"
           } ${isPaused ? "opacity-50" : ""}`}
         >
           {formatTime(remainingSeconds)}
         </span>
       </div>
 
-      <div className="h-3 w-full overflow-hidden rounded-full bg-ed-border/30">
+      <div className="h-3 w-full overflow-hidden rounded-full bg-outline-variant/30">
         <motion.div
           className={`h-full rounded-full ${barColor} ${pulse ? "animate-pulse" : ""}`}
           initial={false}

@@ -22,31 +22,31 @@ const accentMap: Record<
   { border: string; hoverBorder: string; bg: string; text: string; tag: string; shadow: string }
 > = {
   cyan: {
-    border: "border-ed-border",
-    hoverBorder: "group-hover:border-ed-teal",
+    border: "border-outline-variant",
+    hoverBorder: "group-hover:border-primary",
     bg: "",
-    text: "text-ed-teal",
-    tag: "bg-ed-teal/15 text-ed-teal border-2 border-ed-teal/30",
+    text: "text-primary",
+    tag: "bg-primary/15 text-primary border-2 border-primary/30",
     shadow: "shadow-[0_4px_0_#88b870]",
   },
   magenta: {
-    border: "border-ed-border",
-    hoverBorder: "group-hover:border-ed-burnt",
+    border: "border-outline-variant",
+    hoverBorder: "group-hover:border-secondary",
     bg: "",
-    text: "text-ed-burnt",
-    tag: "bg-ed-burnt/15 text-ed-burnt border-2 border-ed-burnt/30",
+    text: "text-secondary",
+    tag: "bg-secondary/15 text-secondary border-2 border-secondary/30",
     shadow: "shadow-[0_4px_0_#88b870]",
   },
   green: {
-    border: "border-ed-border",
-    hoverBorder: "group-hover:border-ed-success",
+    border: "border-outline-variant",
+    hoverBorder: "group-hover:border-primary",
     bg: "",
-    text: "text-ed-success",
-    tag: "bg-ed-success/15 text-ed-success border-2 border-ed-success/30",
+    text: "text-primary",
+    tag: "bg-primary/15 text-primary border-2 border-primary/30",
     shadow: "shadow-[0_4px_0_#88b870]",
   },
   purple: {
-    border: "border-ed-border",
+    border: "border-outline-variant",
     hoverBorder: "group-hover:border-[#7c6dd8]",
     bg: "",
     text: "text-[#7c6dd8]",
@@ -71,7 +71,7 @@ export default function GameCard({
     <motion.div
       whileHover={comingSoon ? {} : { y: 2 }}
       transition={{ type: "spring", stiffness: 400, damping: 20 }}
-      className={`group relative overflow-hidden rounded-2xl border-3 bg-ed-card p-7 transition-all duration-200 ${accent.border} ${accent.hoverBorder} ${accent.shadow} hover:shadow-[0_2px_0_#88b870] ${comingSoon ? "cursor-default opacity-45" : "cursor-pointer"}`}
+      className={`group relative overflow-hidden rounded-2xl border-3 bg-surface-container-lowest p-7 transition-all duration-200 ${accent.border} ${accent.hoverBorder} ${accent.shadow} hover:shadow-[0_2px_0_#88b870] ${comingSoon ? "cursor-default opacity-45" : "cursor-pointer"}`}
     >
       {/* Top accent line */}
       <div className={`absolute inset-x-0 top-0 h-[3px] ${accent.tag} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
@@ -91,17 +91,17 @@ export default function GameCard({
       </div>
 
       {/* Title */}
-      <h3 className={`mb-3 font-display text-2xl ${accent.text}`}>
+      <h3 className={`mb-3 font-headline text-2xl ${accent.text}`}>
         {title}
       </h3>
 
       {/* Description */}
-      <p className="text-[15px] leading-7 text-ed-ink-muted">{description}</p>
+      <p className="text-[15px] leading-7 text-on-surface-variant">{description}</p>
 
       {/* Coming Soon Badge */}
       {comingSoon && (
-        <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-ed-cream/90 via-ed-cream/50 to-transparent pb-6">
-          <span className="rounded-full border border-ed-border bg-ed-card px-5 py-2 text-xs font-semibold tracking-widest text-ed-ink-muted uppercase shadow-sm">
+        <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-surface/90 via-surface/50 to-transparent pb-6">
+          <span className="rounded-full border border-outline-variant bg-surface-container-lowest px-5 py-2 text-xs font-semibold tracking-widest text-on-surface-variant uppercase shadow-sm">
             {comingSoonLabel}
           </span>
         </div>

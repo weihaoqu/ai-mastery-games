@@ -1,148 +1,176 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
+import Header from "@/components/Header";
+import { beginnerCases } from "@/data/detective/beginner";
+import { intermediateCases } from "@/data/detective/intermediate";
+import { advancedCases } from "@/data/detective/advanced";
+import { expertCases } from "@/data/detective/expert";
+import type { Case } from "@/lib/types";
+import { track } from "@/lib/analytics";
 
-import { basePath } from "@/lib/basePath";
+const difficulties = ["beginner", "intermediate", "advanced", "expert"] as const;
 
-const tierImages: Record<string, string> = {
-  beginner: `${basePath}/images/tiers/beginner.png`,
-  intermediate: `${basePath}/images/tiers/intermediate.png`,
-  advanced: `${basePath}/images/tiers/advanced.png`,
-  expert: `${basePath}/images/tiers/expert.png`,
+const casesByDifficulty: Record<string, Case[]> = {
+  beginner: beginnerCases,
+  intermediate: intermediateCases,
+  advanced: advancedCases,
+  expert: expertCases,
 };
 
-const tierKeys = ["beginner", "intermediate", "advanced", "expert"] as const;
+const typeIcon: Record<Case["type"], string> = {
+  hallucination: "psychology",
+  bias: "balance",
+  "prompt-injection": "shield",
+  ethics: "gavel",
+};
 
-const tierConfig: Record<
-  (typeof tierKeys)[number],
-  {
-    emoji: string;
-    active: boolean;
-    href: string;
+const typeColor: Record<Case["type"], string> = {
+  hallucination: "bg-teal-100 text-teal-800 border-teal-300",
+  bias: "bg-orange-100 text-orange-800 border-orange-300",
+  "prompt-injection": "bg-emerald-100 text-emerald-800 border-emerald-300",
+  ethics: "bg-amber-100 text-amber-800 border-amber-300",
+};
+
+const diffColor: Record<string, string> = {
+  beginner: "bg-primary text-on-primary",
+  intermediate: "bg-tertiary text-on-tertiary",
+  advanced: "bg-secondary text-on-secondary",
+  expert: "bg-error text-on-error",
+};
+
+function getCompletedCases(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem("detective-completed");
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
   }
-> = {
-  beginner: {
-    emoji: "\u{1F331}",
-    active: true,
-    href: "/detective/play?difficulty=beginner",
-  },
-  intermediate: {
-    emoji: "\u{1F4DA}",
-    active: true,
-    href: "/detective/play?difficulty=intermediate",
-  },
-  advanced: {
-    emoji: "\u26A1",
-    active: true,
-    href: "/detective/play?difficulty=advanced",
-  },
-  expert: {
-    emoji: "\u{1F525}",
-    active: true,
-    href: "/detective/play?difficulty=expert",
-  },
-};
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.12 },
-  },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
-};
+}
 
 export default function DetectivePage() {
   const t = useTranslations("detective");
   const tDiff = useTranslations("difficulty");
+  const tCase = useTranslations("caseType");
+  const [activeDiff, setActiveDiff] = useState<string>("beginner");
+  const [completed, setCompleted] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    setCompleted(getCompletedCases());
+    const handler = () => setCompleted(getCompletedCases());
+    window.addEventListener("focus", handler);
+    return () => window.removeEventListener("focus", handler);
+  }, []);
+
+  const cases = casesByDifficulty[activeDiff] || [];
+  const completedCount = cases.filter((c) => completed.has(c.id)).length;
 
   return (
-    <div className="min-h-screen bg-ed-cream">
-      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-        {/* Back link */}
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-ed-ink-muted transition-colors hover:text-ed-teal"
-        >
-          <span>&larr;</span> {t("backToHub")}
-        </Link>
-
+    <>
+      <Header />
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pt-20 sm:pt-24">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-12 text-center"
-        >
-          <div className="mx-auto mb-4 h-16 w-16 overflow-hidden rounded-xl">
-            <Image src={`${basePath}/images/games/detective.png`} alt="" width={64} height={64} className="h-full w-full object-cover" />
+        <section className="flex flex-col items-center text-center mb-10">
+          <div className="mb-4 p-4 bg-surface-container-highest rounded-2xl shadow-[4px_4px_0_0_#98b67d]">
+            <span className="material-symbols-outlined text-primary text-5xl" style={{ fontVariationSettings: "'opsz' 48" }}>search_check</span>
           </div>
-          <h1 className="mb-3 font-display text-4xl font-bold tracking-tight text-ed-ink sm:text-5xl lg:text-6xl">
+          <h1 className="font-headline text-4xl md:text-5xl font-extrabold text-on-surface tracking-tight mb-2">
             {t("title")}
           </h1>
-          <p className="text-lg text-ed-ink-muted sm:text-xl">
+          <p className="max-w-xl text-on-surface-variant text-base font-body">
             {t("subtitle")}
           </p>
-        </motion.div>
+        </section>
 
-        {/* Difficulty grid */}
+        {/* Difficulty Tabs */}
+        <div className="flex justify-center gap-2 mb-3 flex-wrap">
+          {difficulties.map((d) => (
+            <button
+              key={d}
+              onClick={() => setActiveDiff(d)}
+              className={`px-5 py-2 rounded-full font-label text-sm font-bold transition-all ${
+                activeDiff === d
+                  ? `${diffColor[d]} shadow-md scale-105`
+                  : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+              }`}
+            >
+              {tDiff(d)}
+            </button>
+          ))}
+        </div>
+
+        {/* Progress */}
+        <p className="text-center text-sm text-on-surface-variant mb-8 font-label">
+          {completedCount}/{cases.length} {t("completed")}
+        </p>
+
+        {/* Case Grid */}
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 gap-5 sm:grid-cols-2"
+          key={activeDiff}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-16"
         >
-          {tierKeys.map((key) => {
-            const tier = tierConfig[key];
-            const inner = (
+          {cases.map((c, i) => {
+            const isDone = completed.has(c.id);
+            const excerpt = c.briefing.length > 100 ? c.briefing.slice(0, 100) + "..." : c.briefing;
+            return (
               <motion.div
-                variants={cardVariants}
-                whileHover={tier.active ? { scale: 1.03 } : {}}
-                whileTap={tier.active ? { scale: 0.98 } : {}}
-                className={`relative rounded-xl border bg-ed-card p-6 transition-colors sm:p-8 ${
-                  tier.active
-                    ? "border-ed-border cursor-pointer hover:border-ed-teal/40 hover:shadow-md"
-                    : "border-ed-border cursor-default opacity-60"
-                }`}
+                key={c.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04, duration: 0.3 }}
               >
-                {!tier.active && (
-                  <span className="absolute right-4 top-4 rounded-full border border-ed-border bg-ed-parchment px-3 py-1 text-xs font-semibold uppercase tracking-wider text-ed-ink-muted">
-                    Coming Soon
-                  </span>
-                )}
+                <Link href={`/detective/play?case=${c.id}`} onClick={() => track('difficulty_select', { game: 'detective', difficulty: activeDiff })}>
+                  <div className={`group relative bg-surface-container-lowest p-5 rounded-xl border-2 transition-all cursor-pointer h-full flex flex-col ${
+                    isDone
+                      ? "border-primary/30 shadow-[0_3px_0_0_rgba(0,106,45,0.3)]"
+                      : "border-outline-variant shadow-[0_4px_0_0_rgba(152,182,125,1)] hover:shadow-[0_2px_0_0_rgba(152,182,125,1)] hover:translate-y-[2px]"
+                  }`}>
+                    {isDone && (
+                      <div className="absolute top-3 right-3">
+                        <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                      </div>
+                    )}
 
-                <div className="mb-3 h-16 w-16 overflow-hidden rounded-lg">
-                  <Image src={tierImages[key]} alt={key} width={64} height={64} className="h-full w-full object-cover" />
-                </div>
-                <h2 className="mb-1 font-display text-xl font-bold text-ed-ink">
-                  {tDiff(key)}
-                </h2>
-                <p className="text-sm text-ed-ink-muted">{tDiff(`${key}Desc`)}</p>
+                    {/* Type badge */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-bold ${typeColor[c.type]}`}>
+                        <span className="material-symbols-outlined text-sm">{typeIcon[c.type]}</span>
+                        {tCase(c.type)}
+                      </span>
+                    </div>
 
-                {tier.active && (
-                  <div className="mt-4 text-sm font-semibold text-ed-teal">
-                    {t("startInvestigation")} &rarr;
+                    {/* Title */}
+                    <h3 className="font-headline text-lg font-bold text-on-surface mb-2 leading-snug">
+                      {c.title}
+                    </h3>
+
+                    {/* Excerpt */}
+                    <p className="text-sm text-on-surface-variant leading-relaxed flex-1 mb-4">
+                      {excerpt}
+                    </p>
+
+                    {/* CTA */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-label text-on-surface-variant">{t("estimatedTime")}</span>
+                      <span className="text-primary font-bold text-sm font-label group-hover:gap-3 flex items-center gap-1 transition-all">
+                        {isDone ? t("replay") : t("investigateCase")}
+                        <span className="material-symbols-outlined text-base">arrow_forward</span>
+                      </span>
+                    </div>
                   </div>
-                )}
+                </Link>
               </motion.div>
-            );
-
-            return tier.active ? (
-              <Link key={key} href={tier.href}>
-                {inner}
-              </Link>
-            ) : (
-              <div key={key}>{inner}</div>
             );
           })}
         </motion.div>
-      </div>
-    </div>
+      </main>
+    </>
   );
 }

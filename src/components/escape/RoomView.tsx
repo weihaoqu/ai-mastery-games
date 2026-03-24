@@ -29,7 +29,6 @@ export default function RoomView({
 
   function handleMouseEnter(id: string) {
     setHoveredId(id);
-    // Mark as discovered once hovered
     setDiscoveredIds((prev) => {
       if (prev.has(id)) return prev;
       const next = new Set(prev);
@@ -40,8 +39,8 @@ export default function RoomView({
 
   return (
     <div
-      className={`relative w-full aspect-video rounded-xl overflow-hidden border border-ed-border ${
-        hasBackground ? "" : "bg-gradient-to-br from-ed-warm to-ed-cream"
+      className={`relative w-full aspect-video rounded-2xl overflow-hidden border-3 border-outline-variant shadow-[4px_4px_0px_0px_#98b67d] ${
+        hasBackground ? "" : "bg-gradient-to-br from-surface-container-low to-surface"
       }`}
       style={{
         cursor: "crosshair",
@@ -59,14 +58,14 @@ export default function RoomView({
 
       {/* Instruction badge */}
       <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-        <span className="rounded-full bg-ed-card/90 border border-ed-border px-4 py-1.5 text-xs font-medium text-ed-ink shadow-sm backdrop-blur-sm">
+        <span className="rounded-full bg-surface-container-lowest/90 border-2 border-outline-variant px-4 py-1.5 text-xs font-label font-bold text-on-surface shadow-sm backdrop-blur-sm uppercase tracking-wider">
           {t("clickToInvestigate")}
         </span>
       </div>
 
       {/* Discovery counter */}
       <div className="absolute top-3 right-3 z-20 pointer-events-none">
-        <span className="rounded-full bg-ed-card/90 border border-ed-border px-3 py-1 text-[10px] font-medium text-ed-ink-muted backdrop-blur-sm">
+        <span className="rounded-full bg-surface-container-lowest/90 border-2 border-outline-variant px-3 py-1 text-[10px] font-label font-bold text-on-surface-variant backdrop-blur-sm uppercase tracking-widest">
           {discoveredIds.size} / {room.objects.length} {t("discovered") ?? "found"}
         </span>
       </div>
@@ -92,7 +91,7 @@ export default function RoomView({
             onMouseLeave={() => setHoveredId(null)}
             onBlur={() => setHoveredId(null)}
             aria-label={`${obj.name}${isSolved && !isExit ? " (solved)" : ""}${exitLocked ? " (locked)" : ""}${exitReady ? " (ready)" : ""}`}
-            className="absolute z-10 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-ed-teal/60"
+            className="absolute z-10 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-primary/60"
             style={{
               left: `${obj.position.x}%`,
               top: `${obj.position.y}%`,
@@ -102,28 +101,24 @@ export default function RoomView({
                 isSolved && !isExit ? "default" : "pointer",
             }}
             animate={
-              // Solved: no animation
               isSolved && !isExit
                 ? {}
-                : // Hovered: bright glow
-                  isHovered
+                : isHovered
                   ? {
-                      boxShadow: "0 0 20px 4px rgba(13, 115, 119, 0.4)",
-                      backgroundColor: "rgba(13, 115, 119, 0.08)",
-                      borderColor: "rgba(13, 115, 119, 0.5)",
+                      boxShadow: "0 0 20px 4px rgba(0, 106, 45, 0.4)",
+                      backgroundColor: "rgba(0, 106, 45, 0.08)",
+                      borderColor: "rgba(0, 106, 45, 0.5)",
                     }
-                  : // Exit ready: strong pulse
-                    exitReady
+                  : exitReady
                     ? {
                         boxShadow: [
-                          "0 0 0 0 rgba(13, 115, 119, 0)",
-                          "0 0 24px 6px rgba(13, 115, 119, 0.4)",
-                          "0 0 0 0 rgba(13, 115, 119, 0)",
+                          "0 0 0 0 rgba(0, 106, 45, 0)",
+                          "0 0 24px 6px rgba(0, 106, 45, 0.4)",
+                          "0 0 0 0 rgba(0, 106, 45, 0)",
                         ],
-                        backgroundColor: "rgba(13, 115, 119, 0.05)",
+                        backgroundColor: "rgba(0, 106, 45, 0.05)",
                       }
-                    : // Undiscovered: very faint shimmer to hint something is there
-                      !isDiscovered
+                    : !isDiscovered
                       ? {
                           boxShadow: [
                             "0 0 0 0 rgba(255, 255, 255, 0)",
@@ -131,12 +126,11 @@ export default function RoomView({
                             "0 0 0 0 rgba(255, 255, 255, 0)",
                           ],
                         }
-                      : // Discovered but not hovered: subtle idle glow
-                        {
+                      : {
                           boxShadow: [
-                            "0 0 0 0 rgba(13, 115, 119, 0)",
-                            "0 0 6px 1px rgba(13, 115, 119, 0.1)",
-                            "0 0 0 0 rgba(13, 115, 119, 0)",
+                            "0 0 0 0 rgba(0, 106, 45, 0)",
+                            "0 0 6px 1px rgba(0, 106, 45, 0.1)",
+                            "0 0 0 0 rgba(0, 106, 45, 0)",
                           ],
                         }
             }
@@ -156,73 +150,73 @@ export default function RoomView({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 4, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute -top-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-0.5 rounded-lg bg-ed-ink/85 px-3 py-1.5 shadow-lg backdrop-blur-sm whitespace-nowrap"
+                  className="absolute -top-12 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-0.5 rounded-xl bg-on-surface/85 px-4 py-2 shadow-lg backdrop-blur-sm whitespace-nowrap"
                 >
                   <div className="flex items-center gap-1.5">
                     <span className="text-sm leading-none">{obj.icon}</span>
-                    <span className="text-[11px] font-medium text-white">
+                    <span className="text-[11px] font-label font-bold text-white uppercase tracking-wider">
                       {obj.name}
                     </span>
                   </div>
                   {exitLocked && (
                     <span className="text-[9px] text-amber-300">
-                      🔒 {t("exitLocked", { remaining: codesRemaining })}
+                      {t("exitLocked", { remaining: codesRemaining })}
                     </span>
                   )}
                   {exitReady && (
                     <span className="text-[9px] text-emerald-300">
-                      ✨ {t("exitReady")}
+                      {t("exitReady")}
                     </span>
                   )}
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Solved badge — small floating indicator */}
+            {/* Solved badge */}
             {isSolved && !isExit && (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full shadow-md ${
+                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full shadow-md border-2 border-surface ${
                   answer?.isCorrect
-                    ? "bg-ed-success/90"
-                    : "bg-ed-error/90"
+                    ? "bg-primary"
+                    : "bg-error"
                 }`}
               >
-                <span className="text-base text-white">
-                  {answer?.isCorrect ? "✓" : "✗"}
+                <span className="material-symbols-outlined text-white text-sm">
+                  {answer?.isCorrect ? "check" : "close"}
                 </span>
               </motion.div>
             )}
 
-            {/* Exit lock badge — always visible */}
+            {/* Exit lock badge */}
             {exitLocked && (
               <motion.div
                 animate={{
                   scale: [1, 1.1, 1],
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-amber-100/90 border border-amber-300 shadow-md"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-secondary-container border-2 border-secondary/30 shadow-md"
               >
-                <span className="text-sm">🔒</span>
+                <span className="material-symbols-outlined text-secondary text-sm">lock</span>
               </motion.div>
             )}
 
-            {/* Exit ready badge — glowing */}
+            {/* Exit ready badge */}
             {exitReady && (
               <motion.div
                 animate={{
                   scale: [1, 1.15, 1],
                   boxShadow: [
-                    "0 0 0 0 rgba(13, 115, 119, 0)",
-                    "0 0 16px 4px rgba(13, 115, 119, 0.4)",
-                    "0 0 0 0 rgba(13, 115, 119, 0)",
+                    "0 0 0 0 rgba(0, 106, 45, 0)",
+                    "0 0 16px 4px rgba(0, 106, 45, 0.4)",
+                    "0 0 0 0 rgba(0, 106, 45, 0)",
                   ],
                 }}
                 transition={{ duration: 1.5, repeat: Infinity }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-ed-teal/90 shadow-lg"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-primary shadow-lg"
               >
-                <span className="text-lg">🚪</span>
+                <span className="material-symbols-outlined text-on-primary text-lg">door_open</span>
               </motion.div>
             )}
           </motion.button>

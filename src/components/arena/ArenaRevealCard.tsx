@@ -8,7 +8,6 @@ import type {
   CritiqueRound,
   BattleRound,
   OptimizeChallenge,
-  ArenaMode,
 } from "@/lib/types";
 import { playCorrect, playWrong } from "@/lib/sounds";
 
@@ -36,40 +35,28 @@ interface ArenaRevealCardProps {
   onNext: () => void;
 }
 
-/* ------------------------------------------------------------------ */
-/* Mode-specific reveal sections                                      */
-/* ------------------------------------------------------------------ */
-
-function CritiqueReveal({
-  data,
-}: {
-  data: CritiqueRevealData;
-}) {
+function CritiqueReveal({ data }: { data: CritiqueRevealData }) {
   const t = useTranslations("arena");
   const correctOrder = [...data.round.prompts].sort((a, b) => a.rank - b.rank);
 
   return (
     <div className="space-y-5">
-      {/* Player ranking vs correct */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {/* Player's ranking */}
         <div>
-          <p className="mb-2 text-xs uppercase tracking-widest text-ed-ink-muted">
+          <p className="mb-2 text-xs uppercase tracking-widest text-on-surface-variant font-label font-bold">
             {t("yourRanking")}
           </p>
           <ol className="space-y-2">
             {data.playerRanking.map((text, idx) => {
-              const correctIdx = correctOrder.findIndex(
-                (p) => p.text === text
-              );
+              const correctIdx = correctOrder.findIndex((p) => p.text === text);
               const isRight = correctIdx === idx;
               return (
                 <li
                   key={idx}
-                  className={`rounded-lg border p-3 text-sm leading-6 ${
+                  className={`rounded-xl border-b-4 p-4 text-sm leading-6 ${
                     isRight
-                      ? "border-ed-success/40 text-ed-success"
-                      : "border-ed-error/40 text-ed-error"
+                      ? "border-primary/40 bg-primary-container/20 text-primary"
+                      : "border-error/40 bg-error/5 text-error"
                   }`}
                 >
                   <span className="font-bold mr-2">{idx + 1}.</span>
@@ -80,20 +67,19 @@ function CritiqueReveal({
           </ol>
         </div>
 
-        {/* Correct ranking */}
         <div>
-          <p className="mb-2 text-xs uppercase tracking-widest text-ed-ink-muted">
+          <p className="mb-2 text-xs uppercase tracking-widest text-on-surface-variant font-label font-bold">
             {t("correctRanking")}
           </p>
           <ol className="space-y-2">
             {correctOrder.map((prompt, idx) => (
               <li
                 key={idx}
-                className="rounded-lg border border-ed-border bg-ed-warm p-3 text-sm leading-6 text-ed-ink"
+                className="rounded-xl border-b-4 border-outline-variant bg-surface-container-low p-4 text-sm leading-6 text-on-surface"
               >
                 <span className="font-bold mr-2">{idx + 1}.</span>
                 {prompt.text}
-                <p className="mt-1 text-xs text-ed-ink-muted">
+                <p className="mt-1 text-xs text-on-surface-variant">
                   {prompt.explanation}
                 </p>
               </li>
@@ -110,18 +96,8 @@ function BattleReveal({ data }: { data: BattleRevealData }) {
   const isWinnerA = data.round.winner === "A";
 
   const sides = [
-    {
-      key: "A" as const,
-      label: t("promptA"),
-      prompt: data.round.promptA,
-      isWinner: isWinnerA,
-    },
-    {
-      key: "B" as const,
-      label: t("promptB"),
-      prompt: data.round.promptB,
-      isWinner: !isWinnerA,
-    },
+    { key: "A" as const, label: t("promptA"), prompt: data.round.promptA, isWinner: isWinnerA },
+    { key: "B" as const, label: t("promptB"), prompt: data.round.promptB, isWinner: !isWinnerA },
   ];
 
   return (
@@ -130,28 +106,28 @@ function BattleReveal({ data }: { data: BattleRevealData }) {
         {sides.map(({ key, label, prompt, isWinner }) => (
           <div
             key={key}
-            className={`rounded-xl border-2 p-4 transition-all ${
+            className={`rounded-2xl border-b-4 p-5 transition-all ${
               isWinner
-                ? "border-ed-teal bg-ed-teal/5"
-                : "border-ed-border opacity-60"
+                ? "border-primary bg-primary-container/20"
+                : "border-outline-variant opacity-60"
             }`}
           >
-            <p className="mb-1 font-display text-sm text-ed-ink-muted">
+            <p className="mb-1 font-label text-sm text-on-surface-variant uppercase tracking-wider">
               {label}
               {isWinner && (
-                <span className="ml-2 text-ed-teal font-bold">
-                  &#x2713; {t("winner")}
+                <span className="ml-2 text-primary font-bold">
+                  <span className="material-symbols-outlined text-sm align-middle" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span> {t("winner")}
                 </span>
               )}
             </p>
-            <p className="mb-3 text-[15px] leading-7 text-ed-ink">
+            <p className="mb-3 text-base leading-7 text-on-surface">
               {prompt.text}
             </p>
-            <div className="rounded-lg border border-ed-border bg-ed-warm p-3">
-              <p className="mb-1 text-xs uppercase tracking-widest text-ed-ink-muted">
+            <div className="rounded-xl border-2 border-outline-variant/30 bg-surface-container-low p-4">
+              <p className="mb-1 text-xs uppercase tracking-widest text-on-surface-variant font-label font-bold">
                 {t("output")}
               </p>
-              <p className="text-sm leading-6 text-ed-ink whitespace-pre-wrap">
+              <p className="text-sm leading-6 text-on-surface whitespace-pre-wrap font-mono">
                 {prompt.output}
               </p>
             </div>
@@ -160,8 +136,8 @@ function BattleReveal({ data }: { data: BattleRevealData }) {
       </div>
 
       {/* Explanation */}
-      <div className="rounded-lg border border-ed-border bg-ed-parchment p-5">
-        <p className="text-[15px] leading-7 text-ed-ink">
+      <div className="rounded-2xl border-2 border-outline-variant/30 bg-surface-container-low p-6">
+        <p className="text-base leading-7 text-on-surface">
           {data.round.explanation}
         </p>
       </div>
@@ -174,56 +150,49 @@ function OptimizeReveal({ data }: { data: OptimizeRevealData }) {
   const steps = data.challenge.steps;
   const firstPrompt = steps[0]?.prompt ?? "";
   const lastStep = steps[steps.length - 1];
-  // The "final" prompt is the correct option of the last step
   const finalCorrectOption = lastStep?.options.find((o) => o.isCorrect);
 
   return (
     <div className="space-y-5">
-      {/* Before / After */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-ed-border bg-ed-warm p-4">
-          <p className="mb-2 text-xs uppercase tracking-widest text-ed-ink-muted">
+        <div className="rounded-xl border-b-4 border-outline-variant bg-surface-container-low p-5">
+          <p className="mb-2 text-xs uppercase tracking-widest text-on-surface-variant font-label font-bold">
             {t("startingPrompt")}
           </p>
-          <p className="text-sm leading-6 text-ed-ink">{firstPrompt}</p>
+          <p className="text-sm leading-6 text-on-surface">{firstPrompt}</p>
         </div>
         {finalCorrectOption && (
-          <div className="rounded-lg border border-ed-teal/40 bg-ed-teal/5 p-4">
-            <p className="mb-2 text-xs uppercase tracking-widest text-ed-teal">
+          <div className="rounded-xl border-b-4 border-primary/40 bg-primary-container/20 p-5">
+            <p className="mb-2 text-xs uppercase tracking-widest text-primary font-label font-bold">
               {t("finalImprovement")}
             </p>
-            <p className="text-sm leading-6 text-ed-ink">
+            <p className="text-sm leading-6 text-on-surface">
               {finalCorrectOption.text}
             </p>
           </div>
         )}
       </div>
 
-      {/* Step summary */}
       <div className="flex flex-wrap gap-3">
         {data.correctSteps.map((correct, idx) => (
           <div
             key={idx}
-            className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+            className={`flex items-center gap-2 rounded-xl border-b-4 px-4 py-2 text-sm font-label font-bold ${
               correct
-                ? "border-ed-success/40 text-ed-success"
-                : "border-ed-error/40 text-ed-error"
+                ? "border-primary/40 bg-primary-container/20 text-primary"
+                : "border-error/40 bg-error/5 text-error"
             }`}
           >
-            <span className="font-bold">
-              {t("stepOf", { current: idx + 1, total: steps.length })}
+            <span>{t("stepOf", { current: idx + 1, total: steps.length })}</span>
+            <span className="material-symbols-outlined text-sm">
+              {correct ? "check" : "close"}
             </span>
-            <span>{correct ? "\u2713" : "\u2717"}</span>
           </div>
         ))}
       </div>
     </div>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/* Main reveal card                                                   */
-/* ------------------------------------------------------------------ */
 
 export default function ArenaRevealCard({
   answer,
@@ -238,50 +207,35 @@ export default function ArenaRevealCard({
     else playWrong();
   }, [isCorrect]);
 
-  const borderClass = isCorrect
-    ? "border-ed-success/50"
-    : "border-ed-error/50";
-  const glowClass = isCorrect
-    ? "shadow-[0_0_20px_rgba(26,122,76,0.12)]"
-    : "shadow-[0_0_20px_rgba(181,52,42,0.12)]";
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className={`w-full max-w-3xl rounded-xl border-2 bg-ed-card ${borderClass} ${glowClass}`}
+      className={`w-full max-w-4xl rounded-3xl bg-surface-container-lowest border-4 border-outline-variant shadow-[4px_4px_0px_0px_#98b67d]`}
     >
       {/* Result banner */}
       <div
-        className={`flex items-center justify-between rounded-t-xl px-6 py-4 ${
-          isCorrect ? "bg-ed-success/10" : "bg-ed-error/10"
+        className={`flex items-center justify-between rounded-t-[calc(1.5rem-4px)] px-8 py-5 border-b-4 border-outline-variant ${
+          isCorrect ? "bg-primary-container/30" : "bg-error/10"
         }`}
       >
         <div className="flex items-center gap-3">
-          <span
-            className={`text-2xl font-bold ${
-              isCorrect ? "text-ed-success" : "text-ed-error"
-            }`}
-          >
-            {isCorrect ? "\u2713" : "\u2717"}
+          <span className={`material-symbols-outlined text-2xl ${isCorrect ? "text-primary" : "text-error"}`} style={{ fontVariationSettings: "'FILL' 1" }}>
+            {isCorrect ? "check_circle" : "cancel"}
           </span>
-          <span
-            className={`font-display text-lg font-bold ${
-              isCorrect ? "text-ed-success" : "text-ed-error"
-            }`}
-          >
+          <span className={`font-headline text-xl font-extrabold ${isCorrect ? "text-primary" : "text-error"}`}>
             {isCorrect ? t("correct") : t("incorrect")}
           </span>
         </div>
 
         {isCorrect && (
           <div className="text-right">
-            <div className="font-sans text-xl font-bold text-ed-success">
+            <div className="font-headline text-2xl font-extrabold text-primary">
               +{answer.score}
             </div>
             {answer.multiplier > 1 && (
-              <div className="text-xs text-ed-success/70">
+              <div className="text-xs text-primary/70 font-label font-bold">
                 {t("multiplier")}: x{answer.multiplier}
               </div>
             )}
@@ -289,32 +243,22 @@ export default function ArenaRevealCard({
         )}
       </div>
 
-      <div className="space-y-6 p-6 sm:p-8">
-        {/* Mode-specific content */}
-        {revealData.mode === "critique" && (
-          <CritiqueReveal data={revealData} />
-        )}
+      <div className="space-y-6 p-8">
+        {revealData.mode === "critique" && <CritiqueReveal data={revealData} />}
         {revealData.mode === "battle" && <BattleReveal data={revealData} />}
-        {revealData.mode === "optimize" && (
-          <OptimizeReveal data={revealData} />
-        )}
+        {revealData.mode === "optimize" && <OptimizeReveal data={revealData} />}
 
         {/* Streak info */}
         {answer.streak > 0 && (
-          <div className="flex items-center justify-center gap-4 text-sm">
-            <span className="text-ed-ink-muted">
-              {t("streak")}:{" "}
-              <span className="font-sans font-bold text-ed-teal">
-                {answer.streak}
-              </span>
-            </span>
+          <div className="flex items-center justify-center gap-6 text-sm">
+            <div className="flex items-center gap-2 bg-secondary-container px-4 py-1.5 rounded-full shadow-[0_3px_0_0_#893700]">
+              <span className="material-symbols-outlined text-secondary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>local_fire_department</span>
+              <span className="font-label text-on-secondary-container font-bold">{answer.streak}</span>
+            </div>
             {answer.multiplier > 1 && (
-              <span className="text-ed-ink-muted">
-                {t("multiplier")}:{" "}
-                <span className="font-sans font-bold text-ed-success">
-                  x{answer.multiplier}
-                </span>
-              </span>
+              <div className="flex items-center gap-2 bg-tertiary-container px-4 py-1.5 rounded-full shadow-[0_3px_0_0_#382490]">
+                <span className="font-label text-on-tertiary-container font-bold">x{answer.multiplier}</span>
+              </div>
             )}
           </div>
         )}
@@ -322,9 +266,10 @@ export default function ArenaRevealCard({
         {/* Next button */}
         <button
           onClick={onNext}
-          className="w-full rounded-lg border border-ed-teal/40 bg-ed-teal/10 px-6 py-3 font-sans text-sm font-bold text-ed-teal transition-all hover:bg-ed-teal/20 hover:shadow-[0_0_15px_rgba(13,115,119,0.15)]"
+          className="w-full py-4 bg-primary text-on-primary font-headline font-extrabold rounded-xl shadow-[0px_4px_0px_0px_#004c1e] active:translate-y-1 active:shadow-none transition-all border-b-4 border-primary-dim flex items-center justify-center gap-2"
         >
-          {t("next")} &rarr;
+          {t("next")}
+          <span className="material-symbols-outlined">arrow_forward</span>
         </button>
       </div>
     </motion.div>

@@ -11,14 +11,14 @@ interface MatchPuzzleProps {
 }
 
 const PAIR_COLORS = [
-  "bg-ed-teal/15 border-ed-teal/40",
-  "bg-purple-100 border-purple-300",
-  "bg-amber-100 border-amber-300",
-  "bg-rose-100 border-rose-300",
-  "bg-blue-100 border-blue-300",
-  "bg-emerald-100 border-emerald-300",
-  "bg-orange-100 border-orange-300",
-  "bg-cyan-100 border-cyan-300",
+  "bg-primary-container/30 border-primary/40",
+  "bg-tertiary-container/30 border-tertiary/40",
+  "bg-secondary-container/30 border-secondary/40",
+  "bg-surface-container-high border-outline",
+  "bg-primary-container/20 border-primary/30",
+  "bg-tertiary-container/20 border-tertiary/30",
+  "bg-secondary-container/20 border-secondary/30",
+  "bg-surface-container border-outline-variant",
 ];
 
 function shuffle<T>(arr: T[]): T[] {
@@ -42,7 +42,6 @@ export default function MatchPuzzleComponent({
     [puzzle.instruction],
   );
 
-  // Map: term -> definition (user's pairing)
   const [pairs, setPairs] = useState<Map<string, string>>(new Map());
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [result, setResult] = useState<Map<string, boolean> | null>(null);
@@ -51,7 +50,6 @@ export default function MatchPuzzleComponent({
 
   function handleTermClick(term: string) {
     if (result) return;
-    // If already paired, unpair
     if (pairs.has(term)) {
       setPairs((prev) => {
         const next = new Map(prev);
@@ -66,7 +64,6 @@ export default function MatchPuzzleComponent({
 
   function handleDefClick(def: string) {
     if (result) return;
-    // If this def is already paired, unpair it
     if (pairedDefinitions.has(def)) {
       setPairs((prev) => {
         const next = new Map(prev);
@@ -121,22 +118,21 @@ export default function MatchPuzzleComponent({
   const allPaired = pairs.size === puzzle.pairs.length;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {/* Instruction */}
-      <div className="rounded-lg border border-ed-border bg-ed-parchment p-4">
-        <p className="text-sm leading-relaxed text-ed-ink">
+      <div className="space-y-2">
+        <p className="text-base font-medium leading-relaxed text-on-surface">
           {puzzle.instruction}
         </p>
+        <span className="inline-flex px-3 py-1 bg-tertiary-container text-on-tertiary-container rounded-full text-xs font-label uppercase tracking-widest font-bold">
+          {t("matchPairs")}
+        </span>
       </div>
-
-      <p className="text-center text-xs text-ed-ink-muted">
-        {t("matchPairs")}
-      </p>
 
       {/* Two columns */}
       <div className="grid grid-cols-2 gap-3">
         {/* Terms (left) */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           {puzzle.pairs.map((pair) => {
             const isPaired = pairs.has(pair.term);
             const isSelected = selectedTerm === pair.term;
@@ -147,16 +143,16 @@ export default function MatchPuzzleComponent({
                 key={pair.term}
                 onClick={() => handleTermClick(pair.term)}
                 whileHover={{ scale: 1.02 }}
-                className={`w-full rounded-lg border p-3 text-left text-sm transition-all ${
+                className={`w-full rounded-xl border-b-4 p-3 text-left text-sm font-medium transition-all ${
                   result
                     ? isCorrect
-                      ? "border-ed-success/40 bg-ed-success/10"
-                      : "border-ed-error/40 bg-ed-error/10"
+                      ? "border-primary/40 bg-primary-container/30"
+                      : "border-error/40 bg-error/10"
                     : isSelected
-                      ? "border-ed-teal bg-ed-teal/10 ring-2 ring-ed-teal/20"
+                      ? "border-primary bg-primary-container/30 ring-2 ring-primary/20"
                       : isPaired
                         ? getColorForTerm(pair.term)
-                        : "border-ed-border bg-ed-card hover:border-ed-teal/30"
+                        : "border-outline-variant bg-surface-container-lowest hover:border-primary/30"
                 }`}
               >
                 {pair.term}
@@ -166,12 +162,11 @@ export default function MatchPuzzleComponent({
         </div>
 
         {/* Definitions (right, shuffled) */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           {shuffledDefinitions.map((def) => {
             const color = getColorForDef(def);
             const isPaired = pairedDefinitions.has(def);
 
-            // Check result for this def
             let defResult: boolean | null = null;
             if (result) {
               for (const [term, d] of pairs) {
@@ -187,16 +182,16 @@ export default function MatchPuzzleComponent({
                 key={def}
                 onClick={() => handleDefClick(def)}
                 whileHover={{ scale: 1.02 }}
-                className={`w-full rounded-lg border p-3 text-left text-sm transition-all ${
+                className={`w-full rounded-xl border-b-4 p-3 text-left text-sm transition-all ${
                   result
                     ? defResult === true
-                      ? "border-ed-success/40 bg-ed-success/10"
+                      ? "border-primary/40 bg-primary-container/30"
                       : defResult === false
-                        ? "border-ed-error/40 bg-ed-error/10"
-                        : "border-ed-border bg-ed-card"
+                        ? "border-error/40 bg-error/10"
+                        : "border-outline-variant bg-surface-container-lowest"
                     : isPaired && color
                       ? color
-                      : "border-ed-border bg-ed-card hover:border-ed-teal/30"
+                      : "border-outline-variant bg-surface-container-lowest hover:border-primary/30"
                 }`}
               >
                 {def}
@@ -211,7 +206,7 @@ export default function MatchPuzzleComponent({
         <button
           onClick={handleSubmit}
           disabled={!allPaired}
-          className="w-full rounded-lg border border-ed-teal/40 bg-ed-teal/10 px-6 py-3 font-sans text-sm font-bold text-ed-teal transition-all hover:bg-ed-teal/20 hover:shadow-[0_0_15px_rgba(13,115,119,0.15)] disabled:cursor-not-allowed disabled:opacity-40"
+          className="w-full py-4 bg-primary text-on-primary font-headline font-extrabold rounded-xl shadow-[0px_4px_0px_0px_#004c1e] active:translate-y-1 active:shadow-none transition-all border-b-4 border-primary-dim disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {t("submit")}
         </button>

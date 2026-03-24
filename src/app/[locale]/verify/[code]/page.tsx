@@ -84,7 +84,7 @@ export default function VerifyPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-cyber-dark">
+      <div className="flex min-h-screen items-center justify-center bg-surface">
         <p className="text-gray-500">{t("loading")}</p>
       </div>
     );
@@ -92,7 +92,7 @@ export default function VerifyPage() {
 
   if (notFound || !record) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-cyber-dark bg-grid px-4">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-surface bg-grid px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -107,7 +107,7 @@ export default function VerifyPage() {
           <p className="mb-8 text-xs text-gray-600">{t("notFoundHint")}</p>
           <Link
             href="/"
-            className="rounded-lg bg-cyber-cyan/10 px-6 py-3 font-semibold text-cyber-cyan transition-colors hover:bg-cyber-cyan/20"
+            className="rounded-lg bg-primary/10 px-6 py-3 font-semibold text-primary transition-colors hover:bg-primary/20"
           >
             {t("backToHub")}
           </Link>
@@ -120,7 +120,7 @@ export default function VerifyPage() {
   const masteryLabel = tMastery(record.masteryLevel);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-cyber-dark bg-grid px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-surface bg-grid px-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -133,9 +133,9 @@ export default function VerifyPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="mb-3 inline-block rounded-full border-2 border-cyber-green bg-cyber-green/10 px-4 py-1.5"
+            className="mb-3 inline-block rounded-full border-2 border-primary bg-primary/10 px-4 py-1.5"
           >
-            <span className="text-sm font-bold text-cyber-green">
+            <span className="text-sm font-bold text-primary">
               ✓ {t("verified")}
             </span>
           </motion.div>
@@ -143,13 +143,13 @@ export default function VerifyPage() {
         </div>
 
         {/* Certificate card */}
-        <div className="rounded-xl border border-cyber-border bg-cyber-card p-6">
+        <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6">
           {/* Player name */}
           <div className="mb-6 text-center">
             <p className="mb-1 text-xs uppercase tracking-wider text-gray-500">
               {t("awardedTo")}
             </p>
-            <p className="text-2xl font-bold text-cyber-green">
+            <p className="text-2xl font-bold text-primary">
               {record.playerName}
             </p>
           </div>
@@ -157,7 +157,7 @@ export default function VerifyPage() {
           {/* Score + Mastery */}
           <div className="mb-6 flex items-center justify-center gap-8">
             <div className="text-center">
-              <p className="text-4xl font-bold text-cyber-cyan">{record.overallScore}</p>
+              <p className="text-4xl font-bold text-primary">{record.overallScore}</p>
               <p className="text-xs uppercase tracking-wider text-gray-500">
                 {t("score")}
               </p>
@@ -172,7 +172,7 @@ export default function VerifyPage() {
           </div>
 
           {/* Details */}
-          <div className="space-y-2 border-t border-cyber-border pt-4">
+          <div className="space-y-2 border-t border-outline-variant pt-4">
             <div className="flex justify-between text-sm">
               <span className="text-gray-400">{t("game")}</span>
               <span className="text-gray-200">{record.gameName}</span>
@@ -192,7 +192,7 @@ export default function VerifyPage() {
         <div className="mt-6 text-center">
           <Link
             href="/"
-            className="text-sm text-gray-500 transition-colors hover:text-cyber-cyan"
+            className="text-sm text-gray-500 transition-colors hover:text-primary"
           >
             {t("backToHub")}
           </Link>

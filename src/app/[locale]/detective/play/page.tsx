@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import type { Case, PlayerAnswer, Difficulty } from "@/lib/types";
 import { scoreAnswer, calculateSessionResult } from "@/lib/detective/scoring";
-import { generateId } from "@/lib/storage";
 import { beginnerCases } from "@/data/detective/beginner";
 import { intermediateCases } from "@/data/detective/intermediate";
 import { advancedCases } from "@/data/detective/advanced";
@@ -15,58 +14,61 @@ import { expertCases } from "@/data/detective/expert";
 import { translateCases } from "@/lib/detective/translate-cases";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { GamePlaySkeleton } from "@/components/Skeleton";
+import { trackGameStart, trackCaseAnswer, trackGameAbandon } from "@/lib/analytics";
 
-const casesByDifficulty: Record<string, Case[]> = {
-  beginner: beginnerCases,
-  intermediate: intermediateCases,
-  advanced: advancedCases,
-  expert: expertCases,
+const allCases: Case[] = [
+  ...beginnerCases,
+  ...intermediateCases,
+  ...advancedCases,
+  ...expertCases,
+];
+
+const typeIcon: Record<string, string> = {
+  hallucination: "psychology",
+  bias: "balance",
+  "prompt-injection": "shield",
+  ethics: "gavel",
 };
 
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-const VALID_DIFFICULTIES = new Set(["beginner", "intermediate", "advanced", "expert"]);
-
-function CaseTypeBadge({ type, label }: { type: Case["type"]; label: string }) {
-  const clsMap: Record<Case["type"], string> = {
-    hallucination: "bg-teal-50 text-ed-teal border-ed-teal/40",
-    bias: "bg-orange-50 text-ed-burnt border-ed-burnt/40",
-    "prompt-injection": "bg-emerald-50 text-ed-success border-ed-success/40",
-    ethics: "bg-amber-50 text-amber-700 border-amber-400/40",
-  };
-  return (
-    <span className={`inline-block rounded-full border px-3 py-0.5 text-xs font-semibold uppercase tracking-wider ${clsMap[type]}`}>
-      {label}
-    </span>
-  );
-}
-
-const evidenceIcon: Record<string, string> = {
-  document: "\u{1F4C4}",
-  screenshot: "\u{1F4F8}",
-  data: "\u{1F4CA}",
-  email: "\u{1F4E7}",
-  "chat-log": "\u{1F4AC}",
-  code: "\u{1F4BB}",
+const typeColor: Record<string, string> = {
+  hallucination: "bg-teal-100 text-teal-800 border-teal-300",
+  bias: "bg-orange-100 text-orange-800 border-orange-300",
+  "prompt-injection": "bg-emerald-100 text-emerald-800 border-emerald-300",
+  ethics: "bg-amber-100 text-amber-800 border-amber-300",
 };
 
-type GamePhase = "briefing" | "investigating" | "diagnosing" | "result" | "complete";
+const evidenceIconMap: Record<string, string> = {
+  document: "description",
+  screenshot: "screenshot_monitor",
+  data: "database",
+  email: "mail",
+  "chat-log": "chat",
+  code: "code",
+};
 
-const SAVE_KEY = "detective-progress";
+function markCaseCompleted(caseId: string) {
+  try {
+    const raw = localStorage.getItem("detective-completed");
+    const set: string[] = raw ? JSON.parse(raw) : [];
+    if (!set.includes(caseId)) {
+      set.push(caseId);
+      localStorage.setItem("detective-completed", JSON.stringify(set));
+    }
+  } catch { /* ignore */ }
+}
 
-interface SavedProgress {
-  caseIds: string[];
-  index: number;
-  phase: GamePhase;
-  answers: PlayerAnswer[];
-  difficulty: Difficulty;
+function addAnswerToSession(answer: PlayerAnswer, difficulty: Difficulty) {
+  try {
+    const raw = sessionStorage.getItem("detective-session-answers");
+    const data: { answers: PlayerAnswer[]; difficulty: Difficulty } = raw
+      ? JSON.parse(raw)
+      : { answers: [], difficulty };
+    // Don't duplicate if same case already answered
+    data.answers = data.answers.filter((a) => a.caseId !== answer.caseId);
+    data.answers.push(answer);
+    data.difficulty = difficulty;
+    sessionStorage.setItem("detective-session-answers", JSON.stringify(data));
+  } catch { /* ignore */ }
 }
 
 function PlayInner() {
@@ -75,430 +77,365 @@ function PlayInner() {
   const t = useTranslations("detective");
   const tCase = useTranslations("caseType");
   const locale = useLocale();
-  const rawDifficulty = searchParams.get("difficulty") ?? "beginner";
-  const difficulty = (VALID_DIFFICULTIES.has(rawDifficulty) ? rawDifficulty : "beginner") as Difficulty;
 
-  useEffect(() => {
-    if (!VALID_DIFFICULTIES.has(difficulty)) {
-      router.replace("/detective");
-    }
-  }, [difficulty, router]);
-
-  const [cases, setCases] = useState<Case[]>([]);
-  const [index, setIndex] = useState(0);
-  const [phase, setPhase] = useState<GamePhase>("briefing");
+  const caseId = searchParams.get("case");
+  const [theCase, setTheCase] = useState<Case | null>(null);
+  const [expandedEvidence, setExpandedEvidence] = useState<Set<string>>(new Set());
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [reasoning, setReasoning] = useState("");
-  const [answers, setAnswers] = useState<PlayerAnswer[]>([]);
+  const [submitted, setSubmitted] = useState(false);
+  const [answer, setAnswer] = useState<PlayerAnswer | null>(null);
   const caseStartRef = useRef(Date.now());
 
+  // Load the single case
   useEffect(() => {
-    const source = casesByDifficulty[difficulty];
-    if (!source) return;
-
-    async function initCases() {
-      const saved = sessionStorage.getItem(SAVE_KEY);
-      if (saved) {
-        try {
-          const progress: SavedProgress = JSON.parse(saved);
-          if (progress.difficulty === difficulty && progress.caseIds.length > 0) {
-            const caseMap = new Map(source.map(c => [c.id, c]));
-            const restoredCases = progress.caseIds.map(id => caseMap.get(id)).filter(Boolean) as Case[];
-            if (restoredCases.length === progress.caseIds.length) {
-              const translated = await translateCases(restoredCases, locale);
-              setCases(translated);
-              setIndex(progress.index);
-              setPhase(progress.phase === "result" ? "briefing" : progress.phase);
-              setAnswers(progress.answers);
-              sessionStorage.removeItem("detective-result");
-              return;
-            }
-          }
-        } catch { /* ignore corrupt data */ }
-      }
-
-      const selected = shuffle(source).slice(0, 10);
-      const translated = await translateCases(selected, locale);
-      setCases(translated);
-      sessionStorage.removeItem("detective-result");
-      sessionStorage.removeItem(SAVE_KEY);
+    if (!caseId) {
+      router.replace(`/${locale}/detective`);
+      return;
     }
-
-    initCases();
-  }, [difficulty, locale]);
-
-  useEffect(() => {
-    if (cases.length === 0) return;
-    const progress: SavedProgress = {
-      caseIds: cases.map(c => c.id),
-      index,
-      phase,
-      answers,
-      difficulty,
-    };
-    sessionStorage.setItem(SAVE_KEY, JSON.stringify(progress));
-  }, [cases, index, phase, answers, difficulty]);
-
-  useEffect(() => {
-    if (phase === "briefing") {
-      caseStartRef.current = Date.now();
-      setSelectedOption(null);
-      setReasoning("");
+    const found = allCases.find((c) => c.id === caseId);
+    if (!found) {
+      router.replace(`/${locale}/detective`);
+      return;
     }
-  }, [phase, index]);
+    async function load() {
+      const [translated] = await translateCases([found!], locale);
+      setTheCase(translated);
+      // Auto-expand key evidence
+      const keyIds = new Set(found!.evidence.filter((e) => e.isKey).map((e) => e.id));
+      setExpandedEvidence(keyIds);
+    }
+    load();
+    trackGameStart("detective", found.difficulty);
+  }, [caseId, locale, router]);
 
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      if (answers.length > 0 && phase !== "complete") {
-        e.preventDefault();
-      }
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [answers, phase]);
-
-  const currentCase = cases[index] as Case | undefined;
-  const totalCases = cases.length;
-  const progress = totalCases > 0 ? ((index + (phase === "result" ? 1 : 0)) / totalCases) * 100 : 0;
-
-  const handleSubmit = useCallback(() => {
-    if (!selectedOption || !currentCase) return;
-    const timeSpent = Math.round((Date.now() - caseStartRef.current) / 1000);
-    const answer = scoreAnswer(currentCase, selectedOption, reasoning, timeSpent);
-    setAnswers((prev) => [...prev, answer]);
-    setPhase("result");
-  }, [selectedOption, reasoning, currentCase]);
-
-  const handleComplete = useCallback(() => {
-    const result = calculateSessionResult(answers, cases, difficulty);
-    const session = { ...result, id: generateId(), date: new Date().toISOString() };
-    sessionStorage.setItem("detective-result", JSON.stringify(session));
-    sessionStorage.removeItem(SAVE_KEY);
-    router.push("/detective/results");
-  }, [answers, cases, difficulty, router]);
-
-  const handleNext = useCallback(() => {
-    setIndex((i) => i + 1);
-    setPhase("briefing");
+  const toggleEvidence = useCallback((id: string) => {
+    setExpandedEvidence((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   }, []);
 
-  if (!currentCase) {
+  const handleSubmit = useCallback(() => {
+    if (!selectedOption || !theCase || submitted) return;
+    const timeSpent = Math.round((Date.now() - caseStartRef.current) / 1000);
+    const result = scoreAnswer(theCase, selectedOption, "", timeSpent);
+    setAnswer(result);
+    setSubmitted(true);
+    trackCaseAnswer("detective", theCase.id, result.isCorrect, timeSpent);
+    markCaseCompleted(theCase.id);
+    addAnswerToSession(result, theCase.difficulty as Difficulty);
+    if (result.isCorrect) playCorrect();
+    else playWrong();
+  }, [selectedOption, theCase, submitted]);
+
+  // Track game abandon on page leave
+  const submittedRef = useRef(submitted);
+  submittedRef.current = submitted;
+  const theCaseRef = useRef(theCase);
+  theCaseRef.current = theCase;
+
+  useEffect(() => {
+    const handler = () => {
+      if (!submittedRef.current && theCaseRef.current) {
+        trackGameAbandon("detective", theCaseRef.current.difficulty, 0);
+      }
+    };
+    const visibilityHandler = () => {
+      if (document.visibilityState === "hidden") handler();
+    };
+    window.addEventListener("beforeunload", handler);
+    document.addEventListener("visibilitychange", visibilityHandler);
+    return () => {
+      window.removeEventListener("beforeunload", handler);
+      document.removeEventListener("visibilitychange", visibilityHandler);
+    };
+  }, []);
+
+  if (!theCase) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-ed-cream">
-        <p className="text-ed-ink-muted animate-pulse">{t("shuffling")}</p>
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <p className="text-on-surface-variant animate-pulse">{t("loading")}</p>
       </div>
     );
   }
 
+  const correctOpt = theCase.options.find((o) => o.isCorrect);
+
   return (
-    <div className="min-h-screen bg-ed-cream">
+    <div className="min-h-screen bg-surface">
       {/* Top bar */}
-      <div className="sticky top-0 z-30 border-b border-ed-border bg-ed-cream/90 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <Link href="/detective" className="text-sm text-ed-ink-muted transition-colors hover:text-ed-teal">
-            &larr; {t("exit")}
+      <div className="sticky top-0 z-30 bg-surface/90 backdrop-blur border-b border-outline-variant">
+        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+          <Link href="/detective" className="flex items-center gap-1 text-sm text-on-surface-variant font-label hover:text-primary transition-colors">
+            <span className="material-symbols-outlined text-lg">arrow_back</span>
+            {t("backToHub")}
           </Link>
-          <span className="text-xs font-semibold uppercase tracking-widest text-ed-ink-muted">
-            {t("caseOf", { current: index + 1, total: totalCases })}
+          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-bold ${typeColor[theCase.type]}`}>
+            <span className="material-symbols-outlined text-sm">{typeIcon[theCase.type]}</span>
+            {tCase(theCase.type)}
           </span>
-          <span className="w-14" />
-        </div>
-        <div className="h-0.5 bg-ed-border">
-          <motion.div
-            className="h-full bg-ed-teal"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.4 }}
-          />
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-        <AnimatePresence mode="wait">
-          {/* BRIEFING */}
-          {phase === "briefing" && (
-            <motion.div
-              key={`briefing-${index}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-            >
-              <div className="mb-4">
-                <CaseTypeBadge type={currentCase.type} label={tCase(currentCase.type)} />
-              </div>
-              <h2 className="mb-6 text-2xl font-bold text-ed-ink sm:text-3xl">
-                {currentCase.title}
-              </h2>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="mb-4 text-base leading-7 text-ed-ink-light sm:text-lg sm:leading-8"
-              >
-                {currentCase.briefing}
-              </motion.p>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.6 }}
-                className="mb-8 rounded-lg border border-ed-border bg-ed-parchment p-5 text-[15px] leading-7 text-ed-ink-muted"
-              >
-                {currentCase.context}
-              </motion.p>
-              <button
-                onClick={() => setPhase("investigating")}
-                className="rounded-lg bg-ed-teal/10 px-6 py-3 font-semibold text-ed-teal transition-colors hover:bg-ed-teal/20"
-              >
-                {t("investigate")} &rarr;
-              </button>
-            </motion.div>
-          )}
+      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+        {/* Case Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mb-8"
+        >
+          <h1 className="text-3xl sm:text-4xl font-black font-headline text-on-surface mb-3 leading-tight">
+            {theCase.title}
+          </h1>
+          <p className="text-base text-on-surface-variant leading-relaxed">
+            {theCase.briefing}
+          </p>
+        </motion.div>
 
-          {/* INVESTIGATING */}
-          {phase === "investigating" && (
-            <motion.div
-              key={`investigating-${index}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-            >
-              <h3 className="mb-6 text-lg font-semibold text-ed-ink-light">
-                {t("evidenceBoard")}
-              </h3>
-              <motion.div
-                className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2"
-                initial="hidden"
-                animate="visible"
-                variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
-              >
-                {currentCase.evidence.map((ev) => (
-                  <motion.div
-                    key={ev.id}
-                    variants={{
-                      hidden: { opacity: 0, y: 16 },
-                      visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-                    }}
-                    className={`rounded-lg border p-4 ${
+        {/* Evidence Cards */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+          className="mb-10"
+        >
+          <h2 className="flex items-center gap-2 text-sm font-label font-bold text-on-surface-variant uppercase tracking-widest mb-4">
+            <span className="material-symbols-outlined text-lg">folder_open</span>
+            {t("evidenceBoard")}
+          </h2>
+          <div className="space-y-3">
+            {theCase.evidence.map((ev, i) => {
+              const isExpanded = expandedEvidence.has(ev.id);
+              return (
+                <motion.div
+                  key={ev.id}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.08, duration: 0.3 }}
+                >
+                  <button
+                    onClick={() => toggleEvidence(ev.id)}
+                    className={`w-full text-left rounded-xl border-2 transition-all ${
                       ev.isKey
-                        ? "border-amber-500/40 bg-amber-50"
-                        : "border-ed-border bg-ed-card"
-                    }`}
+                        ? "border-amber-400/60 bg-amber-50/50"
+                        : "border-outline-variant/50 bg-surface-container-lowest"
+                    } ${isExpanded ? "shadow-md" : "shadow-sm hover:shadow-md"}`}
                   >
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="text-xl">{evidenceIcon[ev.type] ?? "\u{1F4C4}"}</span>
-                      <span className="text-base font-semibold text-ed-ink">{ev.title}</span>
+                    <div className="flex items-center gap-3 px-4 py-3">
+                      <span className={`material-symbols-outlined text-xl ${ev.isKey ? "text-amber-600" : "text-on-surface-variant"}`}>
+                        {evidenceIconMap[ev.type] ?? "description"}
+                      </span>
+                      <span className="font-bold text-on-surface text-sm flex-1">{ev.title}</span>
                       {ev.isKey && (
-                        <span className="ml-auto rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600">
+                        <span className="text-[10px] font-black bg-amber-400/30 text-amber-800 px-2 py-0.5 rounded-full uppercase tracking-wider">
                           {t("keyEvidence")}
                         </span>
                       )}
+                      <span className={`material-symbols-outlined text-on-surface-variant text-lg transition-transform ${isExpanded ? "rotate-180" : ""}`}>
+                        expand_more
+                      </span>
                     </div>
-                    <div className="relative">
-                      <div className="max-h-52 overflow-y-auto text-[15px] leading-7 text-ed-ink-muted scrollbar-thin pr-1">
-                        {ev.content}
-                      </div>
-                      {ev.content.length > 300 && (
-                        <div className={`pointer-events-none absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t ${ev.isKey ? "from-amber-50" : "from-ed-card"} to-transparent`} />
+                  </button>
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="overflow-hidden"
+                      >
+                        <div className={`px-4 pb-4 pt-2 ml-9 mr-4 text-sm leading-relaxed text-on-surface-variant ${
+                          ev.isKey ? "" : ""
+                        }`}>
+                          {ev.content}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Question & Options */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+          className="mb-10"
+        >
+          <h2 className="text-xl sm:text-2xl font-bold font-headline text-on-surface mb-5">
+            {theCase.question}
+          </h2>
+          <div className="space-y-3">
+            {theCase.options.map((opt) => {
+              const isSelected = selectedOption === opt.id;
+              const showResult = submitted;
+              const isCorrectOpt = opt.isCorrect;
+
+              let optClass = "border-outline-variant/50 bg-surface-container-lowest hover:border-primary/40 hover:bg-primary/5";
+              if (showResult) {
+                if (isCorrectOpt) optClass = "border-primary bg-primary/10";
+                else if (isSelected && !isCorrectOpt) optClass = "border-error bg-error/10";
+                else optClass = "border-outline-variant/30 bg-surface-container-lowest opacity-50";
+              } else if (isSelected) {
+                optClass = "border-primary bg-primary/5 ring-2 ring-primary/20";
+              }
+
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => !submitted && setSelectedOption(opt.id)}
+                  disabled={submitted}
+                  className={`w-full text-left rounded-xl border-2 p-4 transition-all ${optClass}`}
+                >
+                  <div className="flex items-start gap-3">
+                    {showResult && (
+                      <span className={`material-symbols-outlined text-xl mt-0.5 ${isCorrectOpt ? "text-primary" : isSelected ? "text-error" : "text-on-surface-variant/30"}`}
+                        style={isCorrectOpt ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                      >
+                        {isCorrectOpt ? "check_circle" : isSelected ? "cancel" : "radio_button_unchecked"}
+                      </span>
+                    )}
+                    {!showResult && (
+                      <span className={`material-symbols-outlined text-xl mt-0.5 ${isSelected ? "text-primary" : "text-on-surface-variant/40"}`}
+                        style={isSelected ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                      >
+                        {isSelected ? "radio_button_checked" : "radio_button_unchecked"}
+                      </span>
+                    )}
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-on-surface leading-relaxed">{opt.text}</p>
+                      {showResult && (isCorrectOpt || isSelected) && (
+                        <motion.p
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className={`mt-2 text-xs leading-relaxed ${isCorrectOpt ? "text-primary" : "text-error"}`}
+                        >
+                          {opt.explanation}
+                        </motion.p>
                       )}
                     </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-              <button
-                onClick={() => setPhase("diagnosing")}
-                className="rounded-lg bg-ed-burnt/10 px-6 py-3 font-semibold text-ed-burnt transition-colors hover:bg-ed-burnt/20"
-              >
-                {t("makeDiagnosis")} &rarr;
-              </button>
-            </motion.div>
-          )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </motion.div>
 
-          {/* DIAGNOSING */}
-          {phase === "diagnosing" && (
-            <motion.div
-              key={`diagnosing-${index}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
+        {/* Submit / Result */}
+        {!submitted ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.3 }}
+          >
+            <button
+              onClick={handleSubmit}
+              disabled={!selectedOption}
+              className={`w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all ${
+                selectedOption
+                  ? "bg-primary text-on-primary shadow-[0_4px_0_0_#004c1e] hover:translate-y-[2px] hover:shadow-[0_2px_0_0_#004c1e] active:translate-y-[4px] active:shadow-none"
+                  : "bg-surface-container text-on-surface-variant/50 cursor-not-allowed"
+              }`}
             >
-              <h3 className="mb-6 text-xl font-bold text-ed-ink sm:text-2xl">
-                {currentCase.question}
+              <span className="material-symbols-outlined">send</span>
+              {t("submitDiagnosis")}
+            </button>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-6"
+          >
+            {/* Score Banner */}
+            <div className={`rounded-2xl p-6 flex items-center gap-4 ${
+              answer?.isCorrect
+                ? "bg-primary-container"
+                : "bg-error-container/20"
+            }`}>
+              <span className={`material-symbols-outlined text-5xl ${answer?.isCorrect ? "text-primary" : "text-error"}`}
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                {answer?.isCorrect ? "emoji_events" : "close"}
+              </span>
+              <div>
+                <p className={`text-2xl font-black font-headline ${answer?.isCorrect ? "text-on-primary-container" : "text-error"}`}>
+                  {answer?.isCorrect ? t("correctDiagnosis") : t("incorrectDiagnosis")}
+                </p>
+                <p className="text-sm text-on-surface-variant font-label">
+                  {answer?.score} {t("pts")}
+                </p>
+              </div>
+            </div>
+
+            {/* Brief Takeaway */}
+            <div className="rounded-xl border-2 border-outline-variant/50 bg-surface-container-lowest p-5">
+              <h3 className="flex items-center gap-2 text-sm font-label font-bold text-on-surface-variant uppercase tracking-widest mb-2">
+                <span className="material-symbols-outlined text-base">lightbulb</span>
+                {t("explanation")}
               </h3>
+              <p className="text-sm text-on-surface leading-relaxed">
+                {theCase.correctDiagnosis}
+              </p>
+            </div>
 
-              <div className="mb-6 space-y-3">
-                {currentCase.options.map((opt) => (
-                  <button
-                    key={opt.id}
-                    onClick={() => setSelectedOption(opt.id)}
-                    aria-pressed={selectedOption === opt.id}
-                    className={`w-full rounded-lg border p-4 text-left text-[15px] leading-7 transition-all sm:text-base ${
-                      selectedOption === opt.id
-                        ? "border-ed-teal bg-ed-teal/5 text-ed-ink"
-                        : "border-ed-border bg-ed-card text-ed-ink-muted hover:border-ed-ink-muted/30 hover:bg-ed-warm"
-                    }`}
-                  >
-                    {opt.text}
-                  </button>
-                ))}
-              </div>
-
-              <div className="mb-6">
-                <label className="mb-2 block text-base text-ed-ink-muted">
-                  {t("reasoningLabel")}
-                </label>
-                <textarea
-                  value={reasoning}
-                  onChange={(e) => setReasoning(e.target.value)}
-                  rows={3}
-                  aria-label={t("reasoningLabel")}
-                  placeholder={t("reasoningPlaceholder")}
-                  className="w-full resize-none rounded-lg border border-ed-border bg-ed-card px-4 py-3 text-base text-ed-ink placeholder-ed-ink-muted/50 outline-none transition-colors focus:border-ed-teal"
-                />
-              </div>
-
-              <button
-                onClick={handleSubmit}
-                disabled={!selectedOption}
-                className={`rounded-lg px-6 py-3 font-semibold transition-colors ${
-                  selectedOption
-                    ? "bg-ed-success/10 text-ed-success hover:bg-ed-success/20"
-                    : "cursor-not-allowed bg-ed-parchment text-ed-ink-muted/50"
-                }`}
+            {/* Actions */}
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/detective"
+                className="flex items-center gap-2 px-6 py-3 bg-surface-container-highest text-on-surface font-bold rounded-xl border-b-4 border-outline-variant active:translate-y-1 active:border-b-0 transition-all text-sm"
               >
-                {t("submitDiagnosis")} &rarr;
+                <span className="material-symbols-outlined text-lg">grid_view</span>
+                {t("browseCases")}
+              </Link>
+              <Link
+                href={`/detective/play?case=${getNextCaseId(theCase)}`}
+                className="flex items-center gap-2 px-6 py-3 bg-primary text-on-primary font-bold rounded-xl border-b-4 border-[#004c1e] active:translate-y-1 active:border-b-0 transition-all text-sm"
+              >
+                <span className="material-symbols-outlined text-lg">skip_next</span>
+                {t("nextCase")}
+              </Link>
+              <button
+                onClick={() => {
+                  try {
+                    const raw = sessionStorage.getItem("detective-session-answers");
+                    if (raw) {
+                      const data = JSON.parse(raw);
+                      const sessionResult = calculateSessionResult(data.answers, allCases, data.difficulty);
+                      const fullResult = { ...sessionResult, id: crypto.randomUUID(), date: new Date().toISOString() };
+                      sessionStorage.setItem("detective-result", JSON.stringify(fullResult));
+                      sessionStorage.removeItem("detective-session-answers");
+                      router.push(`/${locale}/detective/results`);
+                    }
+                  } catch { /* ignore */ }
+                }}
+                className="flex items-center gap-2 px-6 py-3 bg-tertiary text-on-tertiary font-bold rounded-xl border-b-4 border-[#4a3b9e] active:translate-y-1 active:border-b-0 transition-all text-sm"
+              >
+                <span className="material-symbols-outlined text-lg">assessment</span>
+                {t("viewResults")}
               </button>
-            </motion.div>
-          )}
-
-          {/* RESULT */}
-          {phase === "result" && (
-            <motion.div
-              key={`result-${index}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-            >
-              <ResultPhase
-                answer={answers[answers.length - 1]}
-                case_={currentCase}
-                isLast={index === totalCases - 1}
-                onNext={handleNext}
-                onComplete={handleComplete}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );
 }
 
-function ResultPhase({
-  answer,
-  case_,
-  isLast,
-  onNext,
-  onComplete,
-}: {
-  answer: PlayerAnswer;
-  case_: Case;
-  isLast: boolean;
-  onNext: () => void;
-  onComplete: () => void;
-}) {
-  const t = useTranslations("detective");
-  const [displayScore, setDisplayScore] = useState(0);
-  const correct = answer.isCorrect;
-
-  useEffect(() => {
-    if (correct) playCorrect();
-    else playWrong();
-  }, [correct]);
-  const selectedOpt = case_.options.find((o) => o.id === answer.selectedOptionId);
-  const correctOpt = case_.options.find((o) => o.isCorrect);
-
-  useEffect(() => {
-    const target = answer.score;
-    if (target === 0) return;
-    let current = 0;
-    const step = Math.max(1, Math.floor(target / 30));
-    const id = setInterval(() => {
-      current += step;
-      if (current >= target) {
-        current = target;
-        clearInterval(id);
-      }
-      setDisplayScore(current);
-    }, 25);
-    return () => clearInterval(id);
-  }, [answer.score]);
-
-  return (
-    <div>
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="mb-6 flex items-center gap-4"
-      >
-        <span className={`text-5xl ${correct ? "text-ed-success" : "text-ed-error"}`}>
-          {correct ? "\u2713" : "\u2717"}
-        </span>
-        <div>
-          <p className={`text-xl font-bold ${correct ? "text-ed-success" : "text-ed-error"}`}>
-            {correct ? t("correctDiagnosis") : t("incorrectDiagnosis")}
-          </p>
-          <p className="text-3xl font-bold text-ed-ink">
-            {displayScore} <span className="text-base text-ed-ink-muted">{t("pts")}</span>
-          </p>
-        </div>
-      </motion.div>
-
-      <div className="mb-4 rounded-lg border border-ed-border bg-ed-card p-5">
-        <p className="mb-1.5 text-sm font-semibold uppercase tracking-wider text-ed-ink-muted">{t("yourAnswer")}</p>
-        <p className={`text-base leading-7 ${correct ? "text-ed-success" : "text-ed-error"}`}>
-          {selectedOpt?.text}
-        </p>
-      </div>
-
-      {!correct && correctOpt && (
-        <div className="mb-4 rounded-lg border border-ed-success/30 bg-ed-success/5 p-5">
-          <p className="mb-1.5 text-sm font-semibold uppercase tracking-wider text-ed-success">{t("correctAnswer")}</p>
-          <p className="text-base leading-7 text-ed-ink">{correctOpt.text}</p>
-        </div>
-      )}
-
-      <div className="mb-4 rounded-lg border border-ed-border bg-ed-card p-5">
-        <p className="mb-1.5 text-sm font-semibold uppercase tracking-wider text-ed-ink-muted">{t("explanation")}</p>
-        <p className="text-[15px] leading-7 text-ed-ink">{case_.correctDiagnosis}</p>
-      </div>
-
-      <div className="mb-8 rounded-lg border border-ed-border bg-ed-card p-5">
-        <p className="mb-1.5 text-sm font-semibold uppercase tracking-wider text-ed-ink-muted">{t("recommendedFix")}</p>
-        <p className="text-[15px] leading-7 text-ed-ink">{case_.recommendedFix}</p>
-      </div>
-
-      {isLast ? (
-        <button
-          onClick={onComplete}
-          className="rounded-lg bg-ed-teal/10 px-6 py-3 font-semibold text-ed-teal transition-colors hover:bg-ed-teal/20"
-        >
-          {t("viewResults")} &rarr;
-        </button>
-      ) : (
-        <button
-          onClick={onNext}
-          className="rounded-lg bg-ed-teal/10 px-6 py-3 font-semibold text-ed-teal transition-colors hover:bg-ed-teal/20"
-        >
-          {t("nextCase")} &rarr;
-        </button>
-      )}
-    </div>
-  );
+/** Get the next case in the same difficulty */
+function getNextCaseId(current: Case): string {
+  const sameDiff = allCases.filter((c) => c.difficulty === current.difficulty);
+  const idx = sameDiff.findIndex((c) => c.id === current.id);
+  const next = sameDiff[(idx + 1) % sameDiff.length];
+  return next.id;
 }
 
 export default function PlayPage() {

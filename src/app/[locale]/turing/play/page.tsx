@@ -8,6 +8,7 @@ import { useTranslations, useLocale } from "next-intl";
 import type { TuringItem, TuringAnswer, Difficulty } from "@/lib/types";
 import { scoreTuringAnswer, calculateTuringSessionResult } from "@/lib/turing/scoring";
 import { generateId } from "@/lib/storage";
+import { trackGameStart, trackCaseAnswer, trackGameAbandon } from "@/lib/analytics";
 import SwipeCard from "@/components/turing/SwipeCard";
 import RevealCard from "@/components/turing/RevealCard";
 import { beginnerItems } from "@/data/turing/beginner";
@@ -46,10 +47,29 @@ interface SavedProgress {
   difficulty: Difficulty;
 }
 
+const contentTypeIcon: Record<string, string> = {
+  email: "mail",
+  essay: "description",
+  code: "code",
+  "social-media": "share",
+  "creative-writing": "edit_note",
+  image: "image",
+};
+
+const contentTypeKey: Record<string, string> = {
+  email: "email",
+  essay: "essay",
+  code: "code",
+  "social-media": "socialMedia",
+  "creative-writing": "creativeWriting",
+  image: "image",
+};
+
 function PlayInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const t = useTranslations("turing");
+  const tCt = useTranslations("contentType");
   const locale = useLocale();
   const rawDifficulty = searchParams.get("difficulty") ?? "beginner";
   const difficulty = (VALID_DIFFICULTIES.has(rawDifficulty) ? rawDifficulty : "beginner") as Difficulty;
@@ -61,7 +81,6 @@ function PlayInner() {
   const [streak, setStreak] = useState(0);
   const itemStartRef = useRef(Date.now());
 
-  // Initialize items
   useEffect(() => {
     const source = itemsByDifficulty[difficulty];
     if (!source || source.length === 0) return;
@@ -83,51 +102,69 @@ function PlayInner() {
             return;
           }
         }
-      } catch { /* ignore corrupt data */ }
+      } catch { /* ignore */ }
     }
 
     const selected = shuffle(source).slice(0, 10);
     setItems(selected);
     sessionStorage.removeItem("turing-result");
     sessionStorage.removeItem(SAVE_KEY);
+    trackGameStart("turing", difficulty);
   }, [difficulty]);
 
-  // Save progress
   useEffect(() => {
     if (items.length === 0) return;
     const progress: SavedProgress = {
       itemIds: items.map(i => i.id),
-      index,
-      phase,
-      answers,
-      streak,
-      difficulty,
+      index, phase, answers, streak, difficulty,
     };
     sessionStorage.setItem(SAVE_KEY, JSON.stringify(progress));
   }, [items, index, phase, answers, streak, difficulty]);
 
-  // Reset timer on new item
   useEffect(() => {
-    if (phase === "playing") {
-      itemStartRef.current = Date.now();
-    }
+    if (phase === "playing") itemStartRef.current = Date.now();
   }, [phase, index]);
 
-  // Beforeunload warning
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (answers.length > 0 && phase !== "complete") {
-        e.preventDefault();
-      }
+      if (answers.length > 0 && phase !== "complete") e.preventDefault();
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, [answers, phase]);
 
+  // Track game abandon on page leave
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+  const indexRef = useRef(index);
+  indexRef.current = index;
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+
+  useEffect(() => {
+    const handler = () => {
+      if (phaseRef.current !== "complete" && itemsRef.current.length > 0) {
+        const prog = Math.round((indexRef.current / itemsRef.current.length) * 100);
+        trackGameAbandon("turing", difficulty, prog);
+      }
+    };
+    const visibilityHandler = () => {
+      if (document.visibilityState === "hidden") handler();
+    };
+    window.addEventListener("beforeunload", handler);
+    document.addEventListener("visibilitychange", visibilityHandler);
+    return () => {
+      window.removeEventListener("beforeunload", handler);
+      document.removeEventListener("visibilitychange", visibilityHandler);
+    };
+  }, [difficulty]);
+
   const currentItem = items[index] as TuringItem | undefined;
   const totalItems = items.length;
   const progress = totalItems > 0 ? ((index + (phase === "reveal" ? 1 : 0)) / totalItems) * 100 : 0;
   const lastAnswer = answers.length > 0 ? answers[answers.length - 1] : null;
+
+  const multiplier = streak >= 5 ? 3 : streak >= 4 ? 2.5 : streak >= 3 ? 2 : streak >= 2 ? 1.5 : 1;
 
   const handleSwipe = useCallback((guessedAI: boolean) => {
     if (!currentItem || phase !== "playing") return;
@@ -135,12 +172,12 @@ function PlayInner() {
     const answer = scoreTuringAnswer(currentItem, guessedAI, streak, timeSpent);
     setAnswers(prev => [...prev, answer]);
     setStreak(answer.streak);
+    trackCaseAnswer("turing", currentItem.id, answer.isCorrect, 0);
     setPhase("reveal");
   }, [currentItem, phase, streak]);
 
   const handleNext = useCallback(() => {
     if (index >= totalItems - 1) {
-      // Complete
       const result = calculateTuringSessionResult(answers, items, difficulty);
       const session = { ...result, id: generateId(), date: new Date().toISOString() };
       sessionStorage.setItem("turing-result", JSON.stringify(session));
@@ -150,53 +187,59 @@ function PlayInner() {
       setIndex(i => i + 1);
       setPhase("playing");
     }
-  }, [index, totalItems, answers, items, difficulty, router]);
+  }, [index, totalItems, answers, items, difficulty, router, locale]);
 
   if (!currentItem) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-ed-cream">
-        <p className="text-ed-ink-muted animate-pulse">{t("shuffling")}</p>
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <p className="text-on-surface-variant animate-pulse">{t("shuffling")}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-ed-cream">
-      {/* Top bar */}
-      <div className="sticky top-0 z-30 border-b border-ed-border bg-ed-cream/90 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <Link href="/turing" className="text-sm text-ed-ink-muted transition-colors hover:text-ed-teal">
-            &larr; {t("backToHub")}
-          </Link>
-          <div className="flex items-center gap-4">
-            {streak > 0 && (
-              <span className="font-mono text-sm">
-                <span className="text-ed-burnt">{"\u{1F525}"}</span>{" "}
-                <span className="font-bold text-ed-teal">{streak}</span>
-                {streak >= 2 && (
-                  <span className="ml-1 text-xs text-ed-success">
-                    x{[1, 1.5, 2, 2.5, 3][Math.min(streak - 1, 4)]}
-                  </span>
-                )}
-              </span>
-            )}
-            <span className="text-xs font-semibold uppercase tracking-widest text-ed-ink-muted">
+    <div className="min-h-screen bg-surface flex flex-col">
+      {/* Stitch Header */}
+      <header className="w-full flex justify-between items-center px-3 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-green-400 shadow-[0_4px_0_0_rgba(168,204,136,1)] sticky top-0 z-50">
+        <Link href="/turing" className="flex items-center gap-2 text-white font-bold transition-all hover:scale-95">
+          <span className="material-symbols-outlined">close</span>
+          <span className="font-headline tracking-tight">{t("exit")}</span>
+        </Link>
+
+        <div className="flex-1 max-w-md mx-2 sm:mx-8">
+          <div className="flex justify-between items-end mb-1">
+            <span className="text-[10px] sm:text-xs font-label font-bold text-white uppercase tracking-widest">
               {t("itemOf", { current: index + 1, total: totalItems })}
             </span>
+            <span className="text-[10px] sm:text-xs font-label font-bold text-white">
+              {Math.round(progress)}%
+            </span>
           </div>
-          <span className="w-14" />
+          <div className="h-2.5 sm:h-3 w-full bg-white/20 rounded-full overflow-hidden p-0.5 border border-white/20">
+            <motion.div
+              className="h-full bg-yellow-400 rounded-full"
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.4 }}
+            />
+          </div>
         </div>
-        <div className="h-0.5 bg-ed-border">
-          <motion.div
-            className="h-full bg-ed-teal"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.4 }}
-          />
-        </div>
-      </div>
 
-      <div className="mx-auto flex max-w-4xl flex-col items-center px-4 py-8 sm:px-6">
+        <div className="flex items-center gap-3">
+          {currentItem && (
+            <div className="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/20 flex items-center gap-2">
+              <span className="material-symbols-outlined text-white text-sm">
+                {contentTypeIcon[currentItem.contentType] || "description"}
+              </span>
+              <span className="font-label text-sm font-bold text-white tracking-wider uppercase">
+                {tCt(contentTypeKey[currentItem.contentType] || "essay")}
+              </span>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Main Area */}
+      <main className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden">
         <AnimatePresence mode="wait">
           {phase === "playing" && (
             <motion.div
@@ -207,10 +250,7 @@ function PlayInner() {
               transition={{ duration: 0.3 }}
               className="w-full flex flex-col items-center"
             >
-              <SwipeCard
-                item={currentItem}
-                onSwipe={handleSwipe}
-              />
+              <SwipeCard item={currentItem} onSwipe={handleSwipe} />
             </motion.div>
           )}
 
@@ -223,15 +263,33 @@ function PlayInner() {
               transition={{ duration: 0.3 }}
               className="w-full flex flex-col items-center"
             >
-              <RevealCard
-                item={currentItem}
-                answer={lastAnswer}
-                onNext={handleNext}
-              />
+              <RevealCard item={currentItem} answer={lastAnswer} onNext={handleNext} />
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </main>
+
+      {/* Stitch Footer */}
+      <footer className="w-full bg-surface-container-highest/80 backdrop-blur-md p-4 sm:p-6 flex flex-wrap justify-between items-center gap-4">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 bg-surface-container-lowest px-4 py-2.5 rounded-xl border-2 border-outline-variant shadow-[4px_4px_0_0_#98b67d]">
+            <span className="material-symbols-outlined text-error text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>local_fire_department</span>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-label font-bold text-on-surface-variant leading-none uppercase">Streak</span>
+              <span className="text-xl font-headline font-black text-on-surface leading-none">{streak}</span>
+            </div>
+          </div>
+          {multiplier > 1 && (
+            <div className="flex items-center gap-3 bg-primary-container px-4 py-2.5 rounded-xl border-2 border-primary shadow-[4px_4px_0_0_#006a2d]">
+              <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-label font-bold text-on-primary-fixed-variant leading-none uppercase">Multiplier</span>
+                <span className="text-xl font-headline font-black text-on-primary-container leading-none">x{multiplier}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </footer>
     </div>
   );
 }

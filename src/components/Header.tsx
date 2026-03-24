@@ -1,18 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { locales } from "@/i18n/config";
 import type { Locale } from "@/i18n/config";
-import { basePath } from "@/lib/basePath";
 
 const gameNav = [
-  { key: "detective", href: "/detective", icon: `${basePath}/images/games/detective.png` },
-  { key: "arena", href: "/arena", icon: `${basePath}/images/games/arena.png` },
-  { key: "turing", href: "/turing", icon: `${basePath}/images/games/turing.png` },
-  { key: "escape", href: "/escape-room", icon: `${basePath}/images/escape/icon-beginner.png` },
+  { key: "detective", href: "/detective", icon: "search", label: "Detective" },
+  { key: "arena", href: "/arena", icon: "swords", label: "Arena" },
+  { key: "turing", href: "/turing", icon: "smart_toy", label: "Turing" },
+  { key: "escape", href: "/escape-room", icon: "lock", label: "Escape" },
 ];
 
 export default function Header() {
@@ -45,129 +44,106 @@ export default function Header() {
   }
 
   return (
-    <header className="fixed top-0 z-50 w-full border-b-4 border-[#2d8a47] bg-gradient-to-r from-[#3ba85a] to-[#4ec06a] shadow-[0_4px_0_#2d6e3a]">
+    <header className="fixed top-0 z-50 w-full bg-gradient-to-r from-green-600 to-green-400 shadow-[0_4px_0_0_rgba(168,204,136,1)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
         {/* Logo */}
-        <a href={`${basePath}/`} className="flex items-center gap-3 shrink-0">
-          <span className="font-display text-xl text-white tracking-wide">
-            AI Mastery
-          </span>
-          <span className="hidden sm:inline-block rounded-full bg-[#ffe066] px-2.5 py-0.5 text-xs font-extrabold text-[#7a5d00] tracking-wider uppercase shadow-sm">
-            Games
-          </span>
-        </a>
+        <div className="flex items-center gap-8">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
+            <span className="text-2xl font-black text-white italic font-headline">
+              AI Mastery
+            </span>
+          </Link>
 
-        {/* Desktop Game Nav */}
-        <nav className="hidden lg:flex items-center gap-1 ml-8">
-          {gameNav.map((game) => (
-            <a
-              key={game.key}
-              href={`${basePath}${game.href}`}
-              className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                isActive(game.href)
-                  ? "bg-white/25 text-white"
-                  : "text-white/70 hover:bg-white/15 hover:text-white"
-              }`}
-            >
-              <Image
-                src={game.icon}
-                alt=""
-                width={20}
-                height={20}
-                className="h-5 w-5 rounded object-cover"
-              />
-              <span className="hidden lg:inline">{tGames(`${game.key}.name`)}</span>
-            </a>
-          ))}
-        </nav>
+          {/* Desktop Game Nav */}
+          <nav className="hidden md:flex items-center gap-6">
+            {gameNav.map((game) => (
+              <Link
+                key={game.key}
+                href={game.href}
+                className={`text-sm font-medium transition-colors ${
+                  isActive(game.href)
+                    ? "text-white font-bold border-b-[3px] border-yellow-400 pb-0.5"
+                    : "text-emerald-50/80 hover:text-white"
+                }`}
+              >
+                {tGames(`${game.key}.name`)}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
         <div className="flex items-center gap-3">
-          {/* Profile link */}
-          <a
-            href={`${basePath}/profile`}
-            className={`hidden lg:flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-              isActive("/profile")
-                ? "bg-white/25 text-white"
-                : "text-white/70 hover:bg-white/15 hover:text-white"
-            }`}
-            aria-label="Profile"
+          {/* Games badge */}
+          <div className="hidden sm:flex items-center gap-1 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold font-label shadow-[2px_2px_0_0_#b89a00]">
+            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
+            Games
+          </div>
+
+          {/* Language Selector */}
+          <button
+            onClick={() => {
+              const currentIndex = locales.indexOf(locale as Locale);
+              const nextLocale = locales[(currentIndex + 1) % locales.length];
+              handleLocaleChange(nextLocale);
+            }}
+            className="text-emerald-50/80 hover:bg-white/10 p-2 rounded-lg transition-all"
+            aria-label="Change language"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </a>
+            <span className="material-symbols-outlined">language</span>
+          </button>
+
+          {/* Profile */}
+          <Link
+            href="/profile"
+            className="w-11 h-11 rounded-full border-2 border-white/50 overflow-hidden bg-green-700 flex items-center justify-center text-white hover:border-white transition-all"
+          >
+            <span className="material-symbols-outlined text-xl">person</span>
+          </Link>
 
           {/* Mobile menu toggle */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="lg:hidden flex h-8 w-8 items-center justify-center rounded-lg text-white/70 hover:bg-white/15 hover:text-white"
+            className="md:hidden flex h-11 w-11 items-center justify-center rounded-lg text-white/80 hover:bg-white/15 hover:text-white"
             aria-label="Menu"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              {menuOpen ? (
-                <path d="M18 6L6 18M6 6l12 12" />
-              ) : (
-                <path d="M3 12h18M3 6h18M3 18h18" />
-              )}
-            </svg>
+            <span className="material-symbols-outlined">
+              {menuOpen ? "close" : "menu"}
+            </span>
           </button>
-
-          {/* Language Selector */}
-          <select
-            value={locale}
-            onChange={(e) => handleLocaleChange(e.target.value)}
-            className="rounded-lg border-2 border-white/20 bg-white/15 px-3 py-1.5 text-sm text-white font-semibold outline-none transition-colors hover:border-white/30 focus:border-white/40"
-          >
-            {locales.map((l) => (
-              <option key={l} value={l} className="bg-[#2d5016] text-white">
-                {tLang(l as Locale)}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div className="lg:hidden border-t-2 border-[#2d8a47] bg-gradient-to-b from-[#3ba85a] to-[#2d9048] px-6 py-3">
+        <div className="md:hidden border-t border-white/20 bg-gradient-to-b from-green-500 to-green-600 px-6 py-3">
           <nav className="flex flex-col gap-1">
             {gameNav.map((game) => (
-              <a
+              <Link
                 key={game.key}
-                href={`${basePath}${game.href}`}
+                href={game.href}
                 onClick={() => setMenuOpen(false)}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
                   isActive(game.href)
-                    ? "bg-white/25 text-white"
-                    : "text-white/70 hover:bg-white/15 hover:text-white"
+                    ? "bg-white/20 text-white font-bold"
+                    : "text-emerald-50/80 hover:bg-white/10 hover:text-white"
                 }`}
               >
-                <Image
-                  src={game.icon}
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="h-6 w-6 rounded object-cover"
-                />
+                <span className="material-symbols-outlined text-xl">{game.icon}</span>
                 {tGames(`${game.key}.name`)}
-              </a>
+              </Link>
             ))}
-            <a
-              href={`${basePath}/profile`}
+            <Link
+              href="/profile"
               onClick={() => setMenuOpen(false)}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
                 isActive("/profile")
-                  ? "bg-white/25 text-white"
-                  : "text-white/70 hover:bg-white/15 hover:text-white"
+                  ? "bg-white/20 text-white font-bold"
+                  : "text-emerald-50/80 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
+              <span className="material-symbols-outlined text-xl">person</span>
               Profile
-            </a>
+            </Link>
           </nav>
         </div>
       )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Reorder, motion } from "framer-motion";
+import { Reorder } from "framer-motion";
 import { useTranslations } from "next-intl";
 import type { CritiqueRound } from "@/lib/types";
 
@@ -11,7 +11,6 @@ interface CritiqueCardProps {
   disabled?: boolean;
 }
 
-/** Fisher-Yates shuffle (returns new array). */
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -28,15 +27,12 @@ export default function CritiqueCard({
 }: CritiqueCardProps) {
   const t = useTranslations("arena");
 
-  // Shuffle once on mount (per round) so default order != correct order
   const initialOrder = useMemo(() => {
     const texts = round.prompts.map((p) => p.text);
-    // Shuffle until it differs from the correct ranking
     let shuffled = shuffle(texts);
     const correctOrder = [...round.prompts]
       .sort((a, b) => a.rank - b.rank)
       .map((p) => p.text);
-    // Try a few times to avoid matching correct order
     let attempts = 0;
     while (
       shuffled.every((t, i) => t === correctOrder[i]) &&
@@ -52,24 +48,24 @@ export default function CritiqueCard({
   const [ranking, setRanking] = useState<string[]>(initialOrder);
 
   return (
-    <div className="flex w-full max-w-2xl flex-col items-center gap-6">
-      {/* Task box */}
-      <div className="w-full rounded-lg border border-ed-border bg-ed-parchment p-5">
-        <p className="text-xs uppercase tracking-widest text-ed-ink-muted mb-1">
+    <div className="flex w-full max-w-3xl flex-col items-center gap-6">
+      {/* Task */}
+      <div className="w-full bg-surface-container px-8 py-6 rounded-2xl border-b-4 border-outline-variant">
+        <p className="text-xs uppercase tracking-widest text-on-surface-variant mb-2 font-label font-bold">
           {t("task")}
         </p>
-        <p className="text-[15px] leading-7 text-ed-ink">{round.task}</p>
+        <p className="font-body text-lg font-semibold text-on-surface leading-relaxed">{round.task}</p>
       </div>
 
       {/* Instruction */}
-      <p className="text-sm text-ed-ink-muted">{t("dragToRank")}</p>
+      <p className="text-sm text-on-surface-variant font-label">{t("dragToRank")}</p>
 
       {/* Best label */}
       <div className="w-full flex items-center gap-2">
-        <span className="text-xs font-bold uppercase tracking-widest text-ed-success">
+        <span className="text-xs font-label font-bold uppercase tracking-widest text-primary">
           {t("best")}
         </span>
-        <span className="h-px flex-1 bg-ed-success/30" />
+        <span className="h-px flex-1 bg-primary/30" />
       </div>
 
       {/* Reorderable list */}
@@ -83,14 +79,15 @@ export default function CritiqueCard({
           <Reorder.Item
             key={text}
             value={text}
-            className="cursor-grab rounded-lg border border-ed-border bg-ed-card p-4 shadow-sm active:cursor-grabbing active:shadow-md transition-shadow"
+            className="cursor-grab rounded-xl bg-surface-container-lowest p-5 border-b-4 border-outline-variant active:cursor-grabbing transition-shadow group"
             whileDrag={{ scale: 1.03, boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}
           >
-            <div className="flex items-start gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ed-warm text-xs font-bold text-ed-ink-muted">
+            <div className="flex items-start gap-4">
+              <span className="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">drag_indicator</span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-xs font-headline font-bold text-on-surface-variant">
                 {idx + 1}
               </span>
-              <p className="text-[15px] leading-7 text-ed-ink">{text}</p>
+              <p className="text-base leading-7 text-on-surface">{text}</p>
             </div>
           </Reorder.Item>
         ))}
@@ -98,17 +95,17 @@ export default function CritiqueCard({
 
       {/* Worst label */}
       <div className="w-full flex items-center gap-2">
-        <span className="text-xs font-bold uppercase tracking-widest text-ed-error">
+        <span className="text-xs font-label font-bold uppercase tracking-widest text-error">
           {t("worst")}
         </span>
-        <span className="h-px flex-1 bg-ed-error/30" />
+        <span className="h-px flex-1 bg-error/30" />
       </div>
 
       {/* Submit */}
       <button
         onClick={() => onSubmit(ranking)}
         disabled={disabled}
-        className="w-full rounded-lg border border-ed-teal/40 bg-ed-teal/10 px-6 py-3 font-sans text-sm font-bold text-ed-teal transition-all hover:bg-ed-teal/20 hover:shadow-[0_0_15px_rgba(13,115,119,0.15)] disabled:cursor-not-allowed disabled:opacity-40"
+        className="w-full py-4 bg-primary text-on-primary font-headline font-extrabold rounded-xl shadow-[0px_4px_0px_0px_#004c1e] active:translate-y-1 active:shadow-none transition-all border-b-4 border-primary-dim disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {t("submit")}
       </button>

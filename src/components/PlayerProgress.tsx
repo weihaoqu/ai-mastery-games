@@ -1,24 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { getSessions } from "@/lib/storage";
 import type { SessionResult } from "@/lib/types";
 
 const gameIcons: Record<string, string> = {
-  detective: "/images/games/detective.png",
-  arena: "/images/games/arena.png",
-  turing: "/images/games/turing.png",
-  escape: "/images/escape/icon-beginner.png",
+  detective: "search",
+  arena: "swords",
+  turing: "smart_toy",
+  escape: "lock",
 };
 
 const gameKeys = ["detective", "arena", "turing", "escape"] as const;
 
 export default function PlayerProgress() {
   const t = useTranslations("progress");
-  const tGames = useTranslations("games");
   const tMastery = useTranslations("mastery");
   const [sessions, setSessions] = useState<SessionResult[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -41,90 +39,71 @@ export default function PlayerProgress() {
 
   const gamesPlayed = bestByGame.size;
   const totalGames = 4;
-
-  // Overall average
   const avgScore = Math.round(
     [...bestByGame.values()].reduce((sum, s) => sum + s.overallScore, 0) / gamesPlayed
   );
+  const progressPct = Math.round((gamesPlayed / totalGames) * 100);
 
   return (
     <AnimatePresence>
-      <motion.section
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="mb-12 rounded-xl border border-ed-border bg-ed-card p-6"
+        className="bg-surface-container p-8 rounded-xl outline outline-3 outline-outline-variant relative overflow-hidden"
       >
-        {/* Header row */}
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h2 className="font-display text-lg text-ed-ink">
-              {t("welcomeBack")}
-            </h2>
-            <p className="text-sm text-ed-ink-muted">
-              {t("gamesCompleted", { played: gamesPlayed, total: totalGames })}
-            </p>
+        <div className="relative z-10">
+          <h2 className="text-2xl font-headline font-bold text-on-surface mb-1">
+            {t("welcomeBack")}
+          </h2>
+          <p className="text-on-surface-variant font-label text-sm mb-6">
+            {t("gamesCompleted", { played: gamesPlayed, total: totalGames })} · Avg {avgScore}% Mastery
+          </p>
+
+          {/* Game completion circles */}
+          <div className="flex gap-3 mb-8">
+            {gameKeys.map((key) => {
+              const best = bestByGame.get(key);
+              return best ? (
+                <div
+                  key={key}
+                  className="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md"
+                >
+                  <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
+                </div>
+              ) : (
+                <div
+                  key={key}
+                  className="w-12 h-12 rounded-full bg-white/50 text-on-surface/30 flex items-center justify-center outline outline-2 outline-outline-variant"
+                >
+                  <span className="material-symbols-outlined text-xl">remove</span>
+                </div>
+              );
+            })}
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-ed-teal">{avgScore}%</p>
-            <p className="text-[10px] uppercase tracking-wider text-ed-ink-muted">
-              {t("avgScore")}
-            </p>
+
+          {/* Season progress */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-bold font-label">
+              <span>SEASON PROGRESS</span>
+              <span>{progressPct}%</span>
+            </div>
+            <div className="w-full h-3 bg-white/40 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${progressPct}%` }}
+                transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+                className="h-full bg-primary rounded-full"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Progress bar */}
-        <div className="mb-5 h-2 w-full overflow-hidden rounded-full bg-ed-parchment">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${(gamesPlayed / totalGames) * 100}%` }}
-            transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
-            className="h-full rounded-full bg-ed-teal"
-          />
+        {/* Background decoration */}
+        <div className="absolute -right-4 -bottom-4 opacity-10">
+          <span className="material-symbols-outlined text-[120px]" style={{ fontVariationSettings: "'FILL' 1" }}>cognition</span>
         </div>
-
-        {/* Game cards */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {gameKeys.map((key) => {
-            const best = bestByGame.get(key);
-            return (
-              <div
-                key={key}
-                className={`rounded-lg border p-3 text-center transition-all ${
-                  best
-                    ? "border-ed-teal/30 bg-ed-teal/5"
-                    : "border-ed-border bg-ed-parchment/50 opacity-60"
-                }`}
-              >
-                <Image
-                  src={gameIcons[key]}
-                  alt=""
-                  width={32}
-                  height={32}
-                  className="mx-auto mb-2 h-8 w-8 rounded object-cover"
-                />
-                <p className="text-xs font-medium text-ed-ink truncate">
-                  {tGames(`${key}.name`)}
-                </p>
-                {best ? (
-                  <>
-                    <p className="text-lg font-bold text-ed-teal">
-                      {best.overallScore}%
-                    </p>
-                    <p className="text-[9px] uppercase tracking-wider text-ed-ink-muted">
-                      {tMastery(best.masteryLevel)}
-                    </p>
-                  </>
-                ) : (
-                  <p className="mt-1 text-[10px] text-ed-ink-muted">
-                    {t("notPlayed")}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </motion.section>
+      </motion.div>
     </AnimatePresence>
   );
 }

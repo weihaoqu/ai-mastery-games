@@ -74,26 +74,25 @@ export default function PromptFixPuzzleComponent({
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {/* Instruction */}
-      <div className="rounded-lg border border-ed-border bg-ed-parchment p-4">
-        <p className="text-sm leading-relaxed text-ed-ink">
+      <div className="space-y-2">
+        <p className="font-body text-base font-medium text-on-surface leading-relaxed">
           {puzzle.instruction}
         </p>
+        <div className="flex items-center gap-2">
+          <span className="px-3 py-1 bg-tertiary-container text-on-tertiary-container rounded-full text-xs font-label uppercase tracking-widest font-bold">
+            {t("dragToReorder")}
+          </span>
+        </div>
       </div>
-
-      {/* Drag instruction */}
-      <p className="text-center text-xs text-ed-ink-muted">
-        {t("dragToReorder")}
-        <span className="sr-only"> or use arrow keys to reorder</span>
-      </p>
 
       {/* Reorderable fragments */}
       <Reorder.Group
         axis="y"
         values={order}
         onReorder={setOrder}
-        className="space-y-2"
+        className="space-y-3"
       >
         {order.map((idx, pos) => (
           <Reorder.Item
@@ -106,26 +105,22 @@ export default function PromptFixPuzzleComponent({
             ref={(el: HTMLLIElement | null) => {
               if (focusedIdx === pos && el) el.focus();
             }}
-            className={`cursor-grab rounded-lg border p-3 shadow-sm transition-shadow active:cursor-grabbing active:shadow-md focus:outline-none focus:ring-2 focus:ring-ed-teal/40 ${
+            className={`flex items-center gap-4 p-4 rounded-xl border-b-4 cursor-grab active:cursor-grabbing transition-all focus:outline-none focus:ring-2 focus:ring-primary/40 group ${
               result === "correct"
-                ? "border-ed-success/40 bg-ed-success/5"
+                ? "bg-primary-container/30 border-primary/30"
                 : result === "incorrect"
-                  ? "border-ed-error/40 bg-ed-error/5"
-                  : "border-ed-border bg-ed-card"
+                  ? "bg-error/5 border-error/30"
+                  : "bg-surface-container-lowest border-outline-variant hover:translate-x-1"
             }`}
             whileDrag={{
               scale: 1.03,
               boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
             }}
           >
-            <div className="flex items-start gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ed-warm text-xs font-bold text-ed-ink-muted">
-                {pos + 1}
-              </span>
-              <p className="text-sm leading-relaxed text-ed-ink">
-                {puzzle.fragments[idx]}
-              </p>
-            </div>
+            <span className="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors">drag_indicator</span>
+            <code className="font-mono text-sm bg-surface-container-low px-2 py-1 rounded flex-1">
+              {puzzle.fragments[idx]}
+            </code>
           </Reorder.Item>
         ))}
       </Reorder.Group>
@@ -135,9 +130,9 @@ export default function PromptFixPuzzleComponent({
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-lg border border-ed-error/30 bg-ed-error/5 p-3"
+          className="rounded-xl border-2 border-error/30 bg-error/5 p-4"
         >
-          <p className="text-sm text-ed-error">{puzzle.explanation}</p>
+          <p className="text-sm text-error">{puzzle.explanation}</p>
         </motion.div>
       )}
 
@@ -145,9 +140,9 @@ export default function PromptFixPuzzleComponent({
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-lg border border-ed-success/30 bg-ed-success/5 p-3"
+          className="rounded-xl border-2 border-primary/30 bg-primary-container/30 p-4"
         >
-          <p className="text-sm font-medium text-ed-success">{t("correct")}</p>
+          <p className="text-sm font-bold text-primary">{t("correct")}</p>
         </motion.div>
       )}
 
@@ -155,7 +150,7 @@ export default function PromptFixPuzzleComponent({
       {!result && (
         <button
           onClick={handleSubmit}
-          className="w-full rounded-lg border border-ed-teal/40 bg-ed-teal/10 px-6 py-3 font-sans text-sm font-bold text-ed-teal transition-all hover:bg-ed-teal/20 hover:shadow-[0_0_15px_rgba(13,115,119,0.15)]"
+          className="w-full py-4 bg-primary text-on-primary font-headline font-extrabold rounded-xl shadow-[0px_4px_0px_0px_#004c1e] active:translate-y-1 active:shadow-none transition-all border-b-4 border-primary-dim"
         >
           {t("submit")}
         </button>

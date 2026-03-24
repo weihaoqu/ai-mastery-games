@@ -39,6 +39,10 @@ yarn-error.log*
 # local data store
 /.data
 
+# test screenshots
+test-*.png
+test-screenshots/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

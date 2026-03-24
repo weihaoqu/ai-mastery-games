@@ -16,6 +16,7 @@ import { generateId } from "@/lib/storage";
 import { playCorrect, playWrong, playCollect, playTick } from "@/lib/sounds";
 import { EscapeRoomSkeleton } from "@/components/Skeleton";
 import { basePath } from "@/lib/basePath";
+import { trackGameStart, trackCaseAnswer, trackHintUsed, trackGameAbandon } from "@/lib/analytics";
 import TimerBar from "@/components/escape/TimerBar";
 import RoomView from "@/components/escape/RoomView";
 import PuzzleModal from "@/components/escape/PuzzleModal";
@@ -107,6 +108,7 @@ function PlayInner() {
     // Fresh start
     setRemainingTime(room.timeLimit);
     sessionStorage.removeItem("escape-result");
+    trackGameStart("escape", difficulty);
     setInitialized(true);
   }, [room, difficulty, initialized]);
 
@@ -201,6 +203,36 @@ function PlayInner() {
     return () => window.removeEventListener("beforeunload", handler);
   }, [initialized, gameOver, escaped, solvedPuzzles]);
 
+  // Track game abandon on page leave
+  const gameOverRef = useRef(gameOver);
+  gameOverRef.current = gameOver;
+  const escapedRef = useRef(escaped);
+  escapedRef.current = escaped;
+  const solvedPuzzlesRef = useRef(solvedPuzzles);
+  solvedPuzzlesRef.current = solvedPuzzles;
+
+  useEffect(() => {
+    if (!room) return;
+    const totalNonExit = room.objects.filter((o) => o.puzzleType !== "exit").length;
+    const handler = () => {
+      if (!gameOverRef.current && !escapedRef.current) {
+        const prog = totalNonExit > 0
+          ? Math.round((solvedPuzzlesRef.current.size / totalNonExit) * 100)
+          : 0;
+        trackGameAbandon("escape", difficulty, prog);
+      }
+    };
+    const visibilityHandler = () => {
+      if (document.visibilityState === "hidden") handler();
+    };
+    window.addEventListener("beforeunload", handler);
+    document.addEventListener("visibilitychange", visibilityHandler);
+    return () => {
+      window.removeEventListener("beforeunload", handler);
+      document.removeEventListener("visibilitychange", visibilityHandler);
+    };
+  }, [room, difficulty]);
+
   // --- Hint handler ---
   const handleUseHint = useCallback(
     (puzzleId: string) => {
@@ -209,6 +241,7 @@ function PlayInner() {
         next.add(puzzleId);
         return next;
       });
+      trackHintUsed("escape", puzzleId);
       // Penalty: -60 seconds
       setRemainingTime((prev) => Math.max(0, prev - 60));
     },
@@ -273,6 +306,7 @@ function PlayInner() {
           hintWasUsed,
           timeSpent
         );
+        trackCaseAnswer("escape", activePuzzle, true, 0);
         setSolvedPuzzles((prev) => {
           const next = new Map(prev);
           next.set(activePuzzle, answer);
@@ -300,6 +334,7 @@ function PlayInner() {
           hintWasUsed,
           timeSpent
         );
+        trackCaseAnswer("escape", activePuzzle, false, 0);
         setSolvedPuzzles((prev) => {
           const next = new Map(prev);
           next.set(activePuzzle, answer);
@@ -333,8 +368,8 @@ function PlayInner() {
 
   if (!room) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-ed-cream">
-        <p className="text-ed-ink-muted animate-pulse">{t("loading")}</p>
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <p className="text-on-surface-variant animate-pulse">{t("loading")}</p>
       </div>
     );
   }
@@ -354,13 +389,13 @@ function PlayInner() {
       : "";
 
   return (
-    <div className="flex min-h-screen flex-col bg-ed-cream">
+    <div className="flex min-h-screen flex-col bg-surface">
       {/* Top bar */}
-      <div className="sticky top-0 z-30 border-b border-ed-border bg-ed-cream/90 backdrop-blur">
+      <div className="sticky top-0 z-30 border-b border-outline-variant bg-surface/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3">
           <a
             href={`${basePath}/${locale}/escape-room`}
-            className="shrink-0 text-sm text-ed-ink-muted transition-colors hover:text-ed-teal"
+            className="shrink-0 text-sm text-on-surface-variant transition-colors hover:text-primary"
           >
             &larr; {t("backToHub")}
           </a>
@@ -372,7 +407,7 @@ function PlayInner() {
             />
           </div>
 
-          <span className="shrink-0 text-xs font-semibold uppercase tracking-widest text-ed-ink-muted">
+          <span className="shrink-0 text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
             {t("puzzlesSolved", {
               solved: collectedCodes.length,
               total: totalPuzzles,
@@ -398,18 +433,18 @@ function PlayInner() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.4 }}
-          className="mt-4 rounded-lg border border-ed-border bg-ed-card px-4 py-3"
+          className="mt-4 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3"
         >
-          <p className="text-center text-sm italic text-ed-ink-muted">
+          <p className="text-center text-sm italic text-on-surface-variant">
             {room.scenario}
           </p>
           {collectedCodes.length < totalPuzzles && (
-            <p className="mt-1 text-center text-xs text-ed-ink-muted">
+            <p className="mt-1 text-center text-xs text-on-surface-variant">
               {t("clickToInvestigate")}
             </p>
           )}
           {collectedCodes.length >= totalPuzzles && !escaped && (
-            <p className="mt-1 text-center text-xs font-semibold text-ed-teal">
+            <p className="mt-1 text-center text-xs font-semibold text-primary">
               {t("exitReady")}
             </p>
           )}

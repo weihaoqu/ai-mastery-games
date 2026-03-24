@@ -14,11 +14,12 @@ export default function HintButton({ hint, penalty, used, onUseHint }: HintButto
 
   if (used) {
     return (
-      <div className="rounded-lg border border-ed-border bg-ed-parchment p-4">
-        <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-ed-ink-muted">
-          {"\uD83D\uDCA1"} {t("hintUsed")}
+      <div className="rounded-2xl border-2 border-outline-variant/30 bg-surface-container-low p-5">
+        <div className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>lightbulb</span>
+          {t("hintUsed")}
         </div>
-        <p className="text-sm text-ed-ink">{hint}</p>
+        <p className="text-sm text-on-surface leading-relaxed">{hint}</p>
       </div>
     );
   }
@@ -27,10 +28,10 @@ export default function HintButton({ hint, penalty, used, onUseHint }: HintButto
     <button
       type="button"
       onClick={onUseHint}
-      className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100"
+      className="group flex items-center gap-2 px-5 py-3 bg-tertiary text-on-tertiary font-bold rounded-xl shadow-[0px_4px_0px_0px_#4f3ea7] transition-all active:translate-y-1 active:shadow-none"
     >
-      {"\uD83D\uDCA1"} {t("hint")}
-      <span className="text-xs text-ed-error">-{penalty}s</span>
+      <span className="material-symbols-outlined group-hover:rotate-12 transition-transform">lightbulb</span>
+      <span className="font-label uppercase tracking-widest text-xs">{t("hint")} (-{penalty} pts)</span>
     </button>
   );
 }

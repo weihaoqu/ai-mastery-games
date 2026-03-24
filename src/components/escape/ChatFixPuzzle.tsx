@@ -16,21 +16,16 @@ export default function ChatFixPuzzleComponent({
 }: ChatFixPuzzleProps) {
   const t = useTranslations("escape");
 
-  // Build set of broken message indices from fixes array
   const brokenIndices = useMemo(
     () => new Set(puzzle.fixes.map((f) => f.index)),
     [puzzle.fixes],
   );
 
-  // Track which broken messages have been fixed
   const [fixedMessages, setFixedMessages] = useState<Map<number, string>>(
     new Map(),
   );
-  // Which message is currently being fixed (showing options)
   const [activeFixIndex, setActiveFixIndex] = useState<number | null>(null);
-  // Track shake animation on wrong picks
   const [shakeIndex, setShakeIndex] = useState<number | null>(null);
-  // Track first-attempt correctness
   const [allFirstTry, setAllFirstTry] = useState(true);
   const [finished, setFinished] = useState(false);
 
@@ -46,7 +41,6 @@ export default function ChatFixPuzzleComponent({
     if (!fix) return;
 
     if (optionIdx === fix.correctIndex) {
-      // Correct fix
       setFixedMessages((prev) => {
         const next = new Map(prev);
         next.set(msgIndex, fix.options[optionIdx]);
@@ -54,18 +48,15 @@ export default function ChatFixPuzzleComponent({
       });
       setActiveFixIndex(null);
     } else {
-      // Wrong fix - shake
       setAllFirstTry(false);
       setShakeIndex(msgIndex);
       setTimeout(() => setShakeIndex(null), 500);
     }
   }
 
-  // Stable ref for onSolve to avoid infinite re-render loop
   const onSolveRef = useRef(onSolve);
   onSolveRef.current = onSolve;
 
-  // Check if all fixed
   useEffect(() => {
     if (fixedMessages.size === totalBroken && totalBroken > 0 && !finished) {
       setFinished(true);
@@ -76,18 +67,16 @@ export default function ChatFixPuzzleComponent({
   }, [fixedMessages.size, totalBroken, finished, allFirstTry]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       {/* Instruction */}
-      <div className="rounded-lg border border-ed-border bg-ed-parchment p-4">
-        <p className="text-sm leading-relaxed text-ed-ink">
+      <div className="space-y-2">
+        <p className="text-base font-medium leading-relaxed text-on-surface">
           {puzzle.instruction}
         </p>
+        <span className="inline-flex px-3 py-1 bg-surface-container-high text-on-surface-variant rounded-full text-xs font-label uppercase tracking-widest font-bold">
+          {fixedMessages.size} / {totalBroken} {t("solved")}
+        </span>
       </div>
-
-      {/* Progress */}
-      <p className="text-center text-xs text-ed-ink-muted">
-        {fixedMessages.size} / {totalBroken} {t("solved")}
-      </p>
 
       {/* Chat conversation */}
       <div className="space-y-3">
@@ -111,8 +100,8 @@ export default function ChatFixPuzzleComponent({
               <div className="max-w-[85%] space-y-2">
                 {/* Role label */}
                 <p
-                  className={`text-[10px] font-bold uppercase tracking-widest ${
-                    isUser ? "text-right text-ed-teal" : "text-ed-ink-muted"
+                  className={`text-[10px] font-bold uppercase tracking-widest font-label ${
+                    isUser ? "text-right text-primary" : "text-on-surface-variant"
                   }`}
                 >
                   {msg.role}
@@ -120,16 +109,16 @@ export default function ChatFixPuzzleComponent({
 
                 {/* Message bubble */}
                 <div
-                  className={`rounded-xl px-4 py-3 text-sm leading-relaxed ${
+                  className={`rounded-2xl px-5 py-4 text-sm leading-relaxed ${
                     isUser
-                      ? "bg-ed-teal/10 text-ed-ink"
-                      : "bg-ed-card text-ed-ink"
+                      ? "bg-primary-container/20 text-on-surface"
+                      : "bg-surface-container-lowest text-on-surface"
                   } ${
                     isBroken && !isFixed
-                      ? "border-2 border-dashed border-ed-error/50"
+                      ? "border-2 border-dashed border-error/50"
                       : isFixed
-                        ? "border-2 border-ed-success/40"
-                        : "border border-ed-border"
+                        ? "border-2 border-primary/40"
+                        : "border-2 border-outline-variant/30"
                   }`}
                 >
                   {displayContent}
@@ -138,8 +127,9 @@ export default function ChatFixPuzzleComponent({
                   {isBroken && !isFixed && (
                     <button
                       onClick={() => handleFixClick(idx)}
-                      className="mt-2 inline-flex items-center gap-1 rounded-md border border-ed-error/30 bg-ed-error/5 px-2 py-1 text-xs font-medium text-ed-error transition-colors hover:bg-ed-error/10"
+                      className="mt-3 inline-flex items-center gap-2 rounded-lg bg-error/10 px-3 py-2 text-xs font-label font-bold text-error transition-colors hover:bg-error/20 uppercase tracking-wider"
                     >
+                      <span className="material-symbols-outlined text-sm">build</span>
                       {t("fixThis")}
                     </button>
                   )}
@@ -152,7 +142,7 @@ export default function ChatFixPuzzleComponent({
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="space-y-1 overflow-hidden"
+                      className="space-y-2 overflow-hidden"
                     >
                       {puzzle.fixes
                         .find((f) => f.index === idx)
@@ -160,7 +150,7 @@ export default function ChatFixPuzzleComponent({
                           <button
                             key={optIdx}
                             onClick={() => handleOptionSelect(idx, optIdx)}
-                            className="w-full rounded-lg border border-ed-border bg-ed-warm p-2 text-left text-xs text-ed-ink transition-all hover:border-ed-teal/30 hover:bg-ed-teal/5"
+                            className="w-full rounded-xl border-b-4 border-outline-variant bg-surface-container-low p-3 text-left text-xs text-on-surface transition-all hover:border-primary/30 hover:bg-surface-container"
                           >
                             {option}
                           </button>
@@ -180,9 +170,9 @@ export default function ChatFixPuzzleComponent({
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-lg border border-ed-success/30 bg-ed-success/5 p-3 text-center"
+            className="rounded-xl border-2 border-primary/30 bg-primary-container/30 p-4 text-center"
           >
-            <p className="text-sm font-medium text-ed-success">
+            <p className="text-sm font-headline font-bold text-primary">
               {t("allFixed")}
             </p>
           </motion.div>

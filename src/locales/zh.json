@@ -3,8 +3,16 @@
     "title": "AI 精通挑战",
     "subtitle": "通过4个互动挑战测试你的AI能力",
     "stats": "{games} 个游戏 · {dimensions} 个技能维度 · {levels} 个难度等级",
+    "aiIqTestTitle": "参加官方 AI IQ 测试",
     "aiIqTestDesc": "快速测验，衡量你的AI知识水平",
-    "comingSoon": "即将推出"
+    "comingSoon": "即将推出",
+    "heroLabel": "互动学习",
+    "externalLink": "外部链接",
+    "statsActiveGames": "活跃游戏",
+    "statsSkillDimensions": "技能维度",
+    "statsDifficultyLevels": "难度等级",
+    "hubName": "AI 精通游戏中心",
+    "hubTagline": "互动AI学习平台"
   },
   "progress": {
     "welcomeBack": "欢迎回来！",
@@ -39,22 +47,26 @@
     "detective": {
       "name": "AI 侦探",
       "icon": "🔍",
-      "description": "调查AI故障。发现幻觉、偏见和安全漏洞。"
+      "description": "调查AI故障。发现幻觉、偏见和安全漏洞。",
+      "cta": "开始游戏"
     },
     "arena": {
       "name": "提示词竞技场",
       "icon": "⚔️",
-      "description": "打造完美提示词，在排行榜上竞争。"
+      "description": "打造完美提示词，在排行榜上竞争。",
+      "cta": "进入竞技场"
     },
     "turing": {
       "name": "AI还是人类?",
       "icon": "🤖",
-      "description": "你能区分AI输出和人类作品吗？"
+      "description": "你能区分AI输出和人类作品吗？",
+      "cta": "开始测试"
     },
     "escape": {
       "name": "AI 密室逃脱",
       "icon": "🔐",
-      "description": "在限定时间内解决AI谜题。"
+      "description": "在限定时间内解决AI谜题。",
+      "cta": "开启密室"
     }
   },
   "detective": {
@@ -81,7 +93,12 @@
     "nextCase": "下一个案件",
     "viewResults": "查看结果",
     "shuffling": "正在随机排列案件...",
-    "loading": "正在加载案件..."
+    "loading": "正在加载案件...",
+    "browseCases": "浏览案件",
+    "completed": "已完成",
+    "replay": "重玩",
+    "investigateCase": "调查",
+    "estimatedTime": "约3分钟"
   },
   "difficulty": {
     "beginner": "入门",
@@ -105,6 +122,7 @@
     "overallScore": "总分",
     "masteryLevel": "掌握等级",
     "skillDimensions": "技能维度",
+    "improvementTips": "待提升领域",
     "caseBreakdown": "案件详情",
     "playAgain": "再玩一次",
     "backToHub": "返回主页",
@@ -124,6 +142,13 @@
     "tools": "工具使用",
     "criticalThinking": "批判性思维",
     "ethics": "伦理"
+  },
+  "skillTips": {
+    "prompting": "尝试更具体——使用确切的数字、名称和约束条件，而不是模糊的形容词。",
+    "concepts": "复习AI模型的工作原理——训练数据、令牌、注意力机制和微调。",
+    "tools": "在实际工作流程中练习使用AI工具——关注输出格式、API使用和集成。",
+    "criticalThinking": "更仔细地质疑AI输出——检查来源、寻找逻辑漏洞、验证声明。",
+    "ethics": "考虑更广泛的影响——谁受到影响、使用了什么数据、可能出什么问题。"
   },
   "certificate": {
     "title": "下载证书",
@@ -159,6 +184,7 @@
     "subtitle": "你能分辨AI生成的内容和人类创作的作品吗？",
     "startChallenge": "开始挑战",
     "backToHub": "返回主页",
+    "exit": "退出",
     "ai": "AI",
     "human": "人类",
     "correct": "正确！",

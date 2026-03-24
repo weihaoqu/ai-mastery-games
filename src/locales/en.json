@@ -3,8 +3,16 @@
     "title": "AI MASTERY GAMES",
     "subtitle": "Test your AI proficiency across 4 interactive challenges",
     "stats": "{games} Games · {dimensions} Skill Dimensions · {levels} Difficulty Levels",
+    "aiIqTestTitle": "Take the Official AI IQ Test",
     "aiIqTestDesc": "Measure your AI knowledge with a quick quiz",
-    "comingSoon": "COMING SOON"
+    "comingSoon": "COMING SOON",
+    "heroLabel": "Interactive Learning",
+    "externalLink": "EXTERNAL LINK",
+    "statsActiveGames": "Active Games",
+    "statsSkillDimensions": "Skill Dimensions",
+    "statsDifficultyLevels": "Difficulty Levels",
+    "hubName": "AI Mastery Games Hub",
+    "hubTagline": "Interactive AI Learning Platform"
   },
   "progress": {
     "welcomeBack": "Welcome back!",
@@ -39,22 +47,26 @@
     "detective": {
       "name": "AI Detective",
       "icon": "🔍",
-      "description": "Investigate AI failures. Find hallucinations, bias, and security flaws."
+      "description": "Investigate AI failures. Find hallucinations, bias, and security flaws.",
+      "cta": "PLAY NOW"
     },
     "arena": {
       "name": "Prompt Arena",
       "icon": "⚔️",
-      "description": "Craft the perfect prompt. Compete on the leaderboard."
+      "description": "Craft the perfect prompt. Compete on the leaderboard.",
+      "cta": "ENTER ARENA"
     },
     "turing": {
       "name": "AI or Human?",
       "icon": "🤖",
-      "description": "Can you tell AI output from human work?"
+      "description": "Can you tell AI output from human work?",
+      "cta": "START TEST"
     },
     "escape": {
       "name": "AI Escape Room",
       "icon": "🔐",
-      "description": "Solve AI puzzles against the clock."
+      "description": "Solve AI puzzles against the clock.",
+      "cta": "UNLOCK ROOM"
     }
   },
   "detective": {
@@ -81,7 +93,12 @@
     "nextCase": "NEXT CASE",
     "viewResults": "VIEW RESULTS",
     "shuffling": "Shuffling case files...",
-    "loading": "Loading case files..."
+    "loading": "Loading case files...",
+    "browseCases": "Browse Cases",
+    "completed": "completed",
+    "replay": "Replay",
+    "investigateCase": "Investigate",
+    "estimatedTime": "~3 min"
   },
   "difficulty": {
     "beginner": "Beginner",
@@ -105,6 +122,7 @@
     "overallScore": "Overall Score",
     "masteryLevel": "Mastery Level",
     "skillDimensions": "Skill Dimensions",
+    "improvementTips": "Areas to Improve",
     "caseBreakdown": "Case Breakdown",
     "playAgain": "PLAY AGAIN",
     "backToHub": "BACK TO HUB",
@@ -124,6 +142,13 @@
     "tools": "Tools",
     "criticalThinking": "Critical Thinking",
     "ethics": "Ethics"
+  },
+  "skillTips": {
+    "prompting": "Try being more specific — include exact numbers, names, and constraints instead of vague adjectives.",
+    "concepts": "Review how AI models work under the hood — training data, tokens, attention, and fine-tuning.",
+    "tools": "Practice using AI tools in real workflows — focus on output formatting, API usage, and integrations.",
+    "criticalThinking": "Question AI outputs more carefully — check sources, look for logical gaps, and verify claims.",
+    "ethics": "Consider the broader impact — who is affected, what data is used, and what could go wrong."
   },
   "certificate": {
     "title": "Download Certificate",
@@ -159,6 +184,7 @@
     "subtitle": "Can you tell AI-generated content from human-created work?",
     "startChallenge": "Start Challenge",
     "backToHub": "Back to Hub",
+    "exit": "Exit",
     "ai": "AI",
     "human": "Human",
     "correct": "Correct!",

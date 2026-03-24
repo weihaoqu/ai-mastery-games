@@ -83,7 +83,7 @@ export default function PuzzleModal({
         role="dialog"
         aria-modal="true"
         aria-label={objectName}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 outline-none"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-on-surface/40 backdrop-blur-md p-4 outline-none"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
         }}
@@ -95,70 +95,67 @@ export default function PuzzleModal({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="max-w-2xl w-full max-h-[85vh] overflow-y-auto rounded-xl bg-ed-card border border-ed-border p-6 shadow-xl scrollbar-thin"
+          className="max-w-2xl w-full max-h-[85vh] overflow-y-auto rounded-3xl bg-surface-container-lowest border-4 border-outline-variant shadow-[4px_4px_0px_0px_#98b67d] scrollbar-thin flex flex-col"
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-5">
+          <div className="bg-surface-container px-4 sm:px-8 py-4 sm:py-6 flex items-center justify-between border-b-4 border-outline-variant">
             <div className="flex items-center gap-3">
               <span className="text-2xl">{objectIcon}</span>
-              <h2 className="font-display text-lg font-bold text-ed-ink">
+              <h2 className="font-headline text-2xl font-extrabold text-on-surface tracking-tight">
                 {objectName}
               </h2>
             </div>
             <button
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-ed-border text-ed-ink-muted transition-colors hover:bg-ed-warm hover:text-ed-ink"
+              className="w-11 h-11 rounded-full bg-surface-container-lowest flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors border-2 border-outline-variant active:translate-y-0.5"
               aria-label={t("close")}
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <path d="M1 1l12 12M13 1L1 13" />
-              </svg>
+              <span className="material-symbols-outlined">close</span>
             </button>
           </div>
 
-          {/* Hint button (not for exit puzzle) */}
-          {!isExit && (
-            <div className="mb-5">
+          {/* Content */}
+          <div className="p-4 sm:p-8 space-y-6">
+            {/* Hint button (not for exit puzzle) */}
+            {!isExit && (
               <HintButton
                 hint={hintText}
                 penalty={60}
                 used={hintUsed}
                 onUseHint={onUseHint}
               />
-            </div>
-          )}
+            )}
 
-          {/* Puzzle content */}
-          {puzzle.type === "prompt-fix" && (
-            <PromptFixPuzzleComponent puzzle={puzzle} onSolve={onSolve} />
-          )}
-          {puzzle.type === "spot-error" && (
-            <SpotErrorPuzzleComponent puzzle={puzzle} onSolve={onSolve} />
-          )}
-          {puzzle.type === "match-concepts" && (
-            <MatchPuzzleComponent puzzle={puzzle} onSolve={onSolve} />
-          )}
-          {puzzle.type === "quiz" && (
-            <QuizPuzzleComponent puzzle={puzzle} onSolve={onSolve} />
-          )}
-          {puzzle.type === "chat-fix" && (
-            <ChatFixPuzzleComponent puzzle={puzzle} onSolve={onSolve} />
-          )}
-          {puzzle.type === "exit" && (
-            <ExitPuzzleComponent
-              puzzle={puzzle}
-              collectedCodes={collectedCodes}
-              onSolve={onSolve}
-            />
-          )}
+            {/* Puzzle content */}
+            {puzzle.type === "prompt-fix" && (
+              <PromptFixPuzzleComponent puzzle={puzzle} onSolve={onSolve} />
+            )}
+            {puzzle.type === "spot-error" && (
+              <SpotErrorPuzzleComponent puzzle={puzzle} onSolve={onSolve} />
+            )}
+            {puzzle.type === "match-concepts" && (
+              <MatchPuzzleComponent puzzle={puzzle} onSolve={onSolve} />
+            )}
+            {puzzle.type === "quiz" && (
+              <QuizPuzzleComponent puzzle={puzzle} onSolve={onSolve} />
+            )}
+            {puzzle.type === "chat-fix" && (
+              <ChatFixPuzzleComponent puzzle={puzzle} onSolve={onSolve} />
+            )}
+            {puzzle.type === "exit" && (
+              <ExitPuzzleComponent
+                puzzle={puzzle}
+                collectedCodes={collectedCodes}
+                onSolve={onSolve}
+              />
+            )}
+          </div>
+
+          {/* Footer branding */}
+          <div className="bg-surface-container px-8 py-3 flex justify-center items-center gap-2 opacity-50">
+            <span className="material-symbols-outlined text-sm">security</span>
+            <span className="font-label text-[10px] uppercase tracking-widest font-bold">Encrypted Session</span>
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>

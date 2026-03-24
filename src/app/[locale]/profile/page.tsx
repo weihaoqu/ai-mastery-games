@@ -30,10 +30,10 @@ const gameIcons: Record<string, string> = {
 };
 
 const gameColors: Record<string, string> = {
-  detective: "text-ed-teal",
-  arena: "text-ed-burnt",
-  turing: "text-ed-success",
-  escape: "text-[#6c5ce7]",
+  detective: "text-primary",
+  arena: "text-secondary",
+  turing: "text-primary",
+  escape: "text-tertiary",
 };
 
 export default function ProfilePage() {
@@ -91,11 +91,11 @@ export default function ProfilePage() {
         {
           label: t("avgSkills"),
           data: [d.prompting, d.concepts, d.tools, d.criticalThinking, d.ethics],
-          backgroundColor: "rgba(13, 115, 119, 0.15)",
-          borderColor: "rgba(13, 115, 119, 0.8)",
+          backgroundColor: "rgba(0, 106, 45, 0.15)",
+          borderColor: "rgba(0, 106, 45, 0.8)",
           borderWidth: 2,
-          pointBackgroundColor: "#0d7377",
-          pointBorderColor: "#0d7377",
+          pointBackgroundColor: "#006a2d",
+          pointBorderColor: "#006a2d",
           pointRadius: 4,
         },
       ],
@@ -111,9 +111,9 @@ export default function ProfilePage() {
           beginAtZero: true,
           max: 100,
           ticks: { stepSize: 20, display: false },
-          grid: { color: "rgba(224, 219, 211, 0.6)" },
-          angleLines: { color: "rgba(224, 219, 211, 0.6)" },
-          pointLabels: { color: "#6b6b80", font: { size: 12 } },
+          grid: { color: "rgba(152, 182, 125, 0.3)" },
+          angleLines: { color: "rgba(152, 182, 125, 0.3)" },
+          pointLabels: { color: "#486333", font: { size: 12 } },
         },
       },
       plugins: { legend: { display: false } },
@@ -139,14 +139,14 @@ export default function ProfilePage() {
       : 0;
 
   return (
-    <div className="min-h-screen bg-ed-cream">
+    <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Back link */}
         <Link
           href="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-ed-ink-muted transition-colors hover:text-ed-teal"
+          className="mb-8 inline-flex items-center gap-2 text-sm text-on-surface-variant transition-colors hover:text-primary"
         >
-          <span>&larr;</span> {t("backToHub")}
+          <span className="material-symbols-outlined text-sm">arrow_back</span> {t("backToHub")}
         </Link>
 
         {/* Header */}
@@ -156,22 +156,22 @@ export default function ProfilePage() {
           transition={{ duration: 0.5 }}
           className="mb-10 text-center"
         >
-          <h1 className="mb-2 font-display text-4xl font-bold tracking-tight text-ed-ink sm:text-5xl">
+          <h1 className="mb-2 font-headline text-4xl font-bold tracking-tight text-on-surface sm:text-5xl">
             {t("title")}
           </h1>
-          <p className="text-lg text-ed-ink-muted">{t("subtitle")}</p>
+          <p className="text-lg text-on-surface-variant">{t("subtitle")}</p>
         </motion.div>
 
         {sessions.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="rounded-xl border border-ed-border bg-ed-card p-12 text-center"
+            className="rounded-2xl border-b-4 border-outline-variant bg-surface-container-lowest p-12 text-center"
           >
-            <p className="mb-4 text-lg text-ed-ink-muted">{t("noSessions")}</p>
+            <p className="mb-4 text-lg text-on-surface-variant">{t("noSessions")}</p>
             <Link
               href="/"
-              className="inline-block rounded-lg bg-ed-teal/10 px-6 py-3 font-semibold text-ed-teal transition-colors hover:bg-ed-teal/20"
+              className="inline-block bg-primary text-on-primary font-bold rounded-xl border-b-4 border-primary-dim px-8 py-4 active:translate-y-1 active:shadow-none transition-all"
             >
               {t("startPlaying")}
             </Link>
@@ -185,21 +185,21 @@ export default function ProfilePage() {
               transition={{ delay: 0.1, duration: 0.5 }}
               className="mb-8 grid grid-cols-3 gap-4"
             >
-              <div className="rounded-xl border border-ed-border bg-ed-card p-5 text-center">
-                <p className="text-3xl font-bold text-ed-teal">{totalSessions}</p>
-                <p className="text-xs uppercase tracking-wider text-ed-ink-muted">
+              <div className="rounded-xl border-b-4 border-r-4 border-outline-variant bg-surface-container-lowest p-5 text-center">
+                <p className="text-3xl font-bold text-primary">{totalSessions}</p>
+                <p className="text-xs uppercase tracking-wider text-on-surface-variant">
                   {t("totalSessions")}
                 </p>
               </div>
-              <div className="rounded-xl border border-ed-border bg-ed-card p-5 text-center">
-                <p className="text-3xl font-bold text-ed-teal">{gamesPlayed}/4</p>
-                <p className="text-xs uppercase tracking-wider text-ed-ink-muted">
+              <div className="rounded-xl border-b-4 border-r-4 border-outline-variant bg-surface-container-lowest p-5 text-center">
+                <p className="text-3xl font-bold text-primary">{gamesPlayed}/4</p>
+                <p className="text-xs uppercase tracking-wider text-on-surface-variant">
                   {t("gamesPlayed")}
                 </p>
               </div>
-              <div className="rounded-xl border border-ed-border bg-ed-card p-5 text-center">
-                <p className="text-3xl font-bold text-ed-teal">{avgScore}%</p>
-                <p className="text-xs uppercase tracking-wider text-ed-ink-muted">
+              <div className="rounded-xl border-b-4 border-r-4 border-outline-variant bg-surface-container-lowest p-5 text-center">
+                <p className="text-3xl font-bold text-primary">{avgScore}%</p>
+                <p className="text-xs uppercase tracking-wider text-on-surface-variant">
                   {t("avgScore")}
                 </p>
               </div>
@@ -212,7 +212,7 @@ export default function ProfilePage() {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="mb-8"
             >
-              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-ed-ink-muted">
+              <h3 className="mb-4 font-headline font-bold text-xl text-on-surface-variant">
                 {t("bestScores")}
               </h3>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -223,8 +223,8 @@ export default function ProfilePage() {
                       key={key}
                       className={`rounded-xl border p-4 text-center ${
                         best
-                          ? "border-ed-teal/30 bg-ed-card"
-                          : "border-ed-border bg-ed-parchment/50 opacity-60"
+                          ? "border-b-4 border-primary/40 bg-surface-container-lowest"
+                          : "border-b-4 border-outline-variant bg-surface-container-highest/50 opacity-60"
                       }`}
                     >
                       <Image
@@ -234,7 +234,7 @@ export default function ProfilePage() {
                         height={40}
                         className="mx-auto mb-2 h-10 w-10 rounded-lg object-cover"
                       />
-                      <p className="text-xs font-medium text-ed-ink">
+                      <p className="text-xs font-medium text-on-surface">
                         {tGames(`${key}.name`)}
                       </p>
                       {best ? (
@@ -242,12 +242,12 @@ export default function ProfilePage() {
                           <p className={`text-2xl font-bold ${gameColors[key]}`}>
                             {best.overallScore}%
                           </p>
-                          <p className="text-[10px] uppercase tracking-wider text-ed-ink-muted">
+                          <p className="text-[10px] uppercase tracking-wider text-on-surface-variant">
                             {tMastery(best.masteryLevel)} · {best.difficulty}
                           </p>
                         </>
                       ) : (
-                        <p className="mt-2 text-xs text-ed-ink-muted">—</p>
+                        <p className="mt-2 text-xs text-on-surface-variant">—</p>
                       )}
                     </div>
                   );
@@ -260,9 +260,9 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="mx-auto mb-8 max-w-md rounded-xl border border-ed-border bg-ed-card p-6"
+              className="mx-auto mb-8 max-w-md bg-surface-container p-8 rounded-xl border-b-4 border-outline-variant"
             >
-              <h3 className="mb-4 text-center text-sm font-semibold uppercase tracking-wider text-ed-ink-muted">
+              <h3 className="mb-4 text-center font-headline font-bold text-xl text-on-surface-variant">
                 {t("avgSkills")}
               </h3>
               <Radar data={radarData} options={radarOptions} />
@@ -274,7 +274,7 @@ export default function ProfilePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
             >
-              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-ed-ink-muted">
+              <h3 className="mb-4 font-headline font-bold text-xl text-on-surface-variant">
                 {t("history")}
               </h3>
               <div className="space-y-2">
@@ -284,7 +284,7 @@ export default function ProfilePage() {
                     initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5 + i * 0.03, duration: 0.3 }}
-                    className="flex items-center gap-4 rounded-lg border border-ed-border bg-ed-card px-4 py-3"
+                    className="flex items-center gap-4 rounded-xl border-b-4 border-outline-variant bg-surface-container-lowest px-4 py-3 hover:-translate-y-0.5 transition-transform"
                   >
                     <Image
                       src={gameIcons[s.game]}
@@ -294,10 +294,10 @@ export default function ProfilePage() {
                       className="h-7 w-7 shrink-0 rounded object-cover"
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-ed-ink">
+                      <p className="text-sm font-medium text-on-surface">
                         {tGames(`${s.game}.name`)}
                       </p>
-                      <p className="text-[10px] text-ed-ink-muted">
+                      <p className="text-[10px] text-on-surface-variant">
                         {s.difficulty} · {new Date(s.date).toLocaleDateString()}
                       </p>
                     </div>
@@ -305,7 +305,7 @@ export default function ProfilePage() {
                       <p className={`text-lg font-bold ${gameColors[s.game]}`}>
                         {s.overallScore}%
                       </p>
-                      <p className="text-[9px] uppercase tracking-wider text-ed-ink-muted">
+                      <p className="text-[9px] uppercase tracking-wider text-on-surface-variant">
                         {tMastery(s.masteryLevel)}
                       </p>
                     </div>

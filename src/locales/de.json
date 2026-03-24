@@ -3,8 +3,16 @@
     "title": "AI MASTERY GAMES",
     "subtitle": "Teste deine KI-Kompetenz in 4 interaktiven Herausforderungen",
     "stats": "{games} Spiele · {dimensions} Kompetenzdimensionen · {levels} Schwierigkeitsstufen",
+    "aiIqTestTitle": "Mach den offiziellen AI IQ-Test",
     "aiIqTestDesc": "Teste dein KI-Wissen mit einem schnellen Quiz",
-    "comingSoon": "DEMNÄCHST"
+    "comingSoon": "DEMNÄCHST",
+    "heroLabel": "Interaktives Lernen",
+    "externalLink": "EXTERNER LINK",
+    "statsActiveGames": "Aktive Spiele",
+    "statsSkillDimensions": "Kompetenzdimensionen",
+    "statsDifficultyLevels": "Schwierigkeitsstufen",
+    "hubName": "AI Mastery Spielezentrum",
+    "hubTagline": "Interaktive KI-Lernplattform"
   },
   "progress": {
     "welcomeBack": "Willkommen zurück!",
@@ -39,22 +47,26 @@
     "detective": {
       "name": "KI-Detektiv",
       "icon": "🔍",
-      "description": "Untersuche KI-Fehler. Finde Halluzinationen, Vorurteile und Sicherheitslücken."
+      "description": "Untersuche KI-Fehler. Finde Halluzinationen, Vorurteile und Sicherheitslücken.",
+      "cta": "SPIELEN"
     },
     "arena": {
       "name": "Prompt-Arena",
       "icon": "⚔️",
-      "description": "Erstelle den perfekten Prompt. Tritt auf der Bestenliste an."
+      "description": "Erstelle den perfekten Prompt. Tritt auf der Bestenliste an.",
+      "cta": "ARENA BETRETEN"
     },
     "turing": {
       "name": "KI oder Mensch?",
       "icon": "🤖",
-      "description": "Kannst du KI-Ausgaben von menschlicher Arbeit unterscheiden?"
+      "description": "Kannst du KI-Ausgaben von menschlicher Arbeit unterscheiden?",
+      "cta": "TEST STARTEN"
     },
     "escape": {
       "name": "KI-Escape Room",
       "icon": "🔐",
-      "description": "Löse KI-Rätsel gegen die Uhr."
+      "description": "Löse KI-Rätsel gegen die Uhr.",
+      "cta": "RAUM ÖFFNEN"
     }
   },
   "detective": {
@@ -81,7 +93,12 @@
     "nextCase": "NÄCHSTER FALL",
     "viewResults": "ERGEBNISSE ANZEIGEN",
     "shuffling": "Fallakten werden gemischt...",
-    "loading": "Fallakten werden geladen..."
+    "loading": "Fallakten werden geladen...",
+    "browseCases": "Fälle durchsuchen",
+    "completed": "abgeschlossen",
+    "replay": "Wiederholen",
+    "investigateCase": "Untersuchen",
+    "estimatedTime": "~3 Min."
   },
   "difficulty": {
     "beginner": "Anfänger",
@@ -105,6 +122,7 @@
     "overallScore": "Gesamtpunktzahl",
     "masteryLevel": "Meisterschaftsstufe",
     "skillDimensions": "Kompetenzdimensionen",
+    "improvementTips": "Verbesserungsbereiche",
     "caseBreakdown": "Fallübersicht",
     "playAgain": "NOCHMAL SPIELEN",
     "backToHub": "ZURÜCK ZUR ÜBERSICHT",
@@ -124,6 +142,13 @@
     "tools": "Werkzeuge",
     "criticalThinking": "Kritisches Denken",
     "ethics": "Ethik"
+  },
+  "skillTips": {
+    "prompting": "Sei präziser — verwende genaue Zahlen, Namen und Einschränkungen statt vager Adjektive.",
+    "concepts": "Wiederhole, wie KI-Modelle funktionieren — Trainingsdaten, Tokens, Attention und Feinabstimmung.",
+    "tools": "Übe den Einsatz von KI-Tools in echten Arbeitsabläufen — Ausgabeformatierung, API-Nutzung und Integrationen.",
+    "criticalThinking": "Hinterfrage KI-Ausgaben sorgfältiger — prüfe Quellen, suche nach logischen Lücken und überprüfe Behauptungen.",
+    "ethics": "Bedenke die breiteren Auswirkungen — wer ist betroffen, welche Daten werden verwendet und was könnte schiefgehen."
   },
   "certificate": {
     "title": "Zertifikat herunterladen",
@@ -159,6 +184,7 @@
     "subtitle": "Kannst du KI-generierte Inhalte von menschlicher Arbeit unterscheiden?",
     "startChallenge": "Herausforderung starten",
     "backToHub": "Zurück zur Übersicht",
+    "exit": "Beenden",
     "ai": "KI",
     "human": "Mensch",
     "correct": "Richtig!",

@@ -3,8 +3,16 @@
     "title": "AI MASTERY GAMES",
     "subtitle": "Metti alla prova la tua competenza nell'IA con 4 sfide interattive",
     "stats": "{games} Giochi · {dimensions} Dimensioni di Abilità · {levels} Livelli di Difficoltà",
+    "aiIqTestTitle": "Fai il Test Ufficiale AI IQ",
     "aiIqTestDesc": "Misura le tue conoscenze sull'IA con un quiz veloce",
-    "comingSoon": "PROSSIMAMENTE"
+    "comingSoon": "PROSSIMAMENTE",
+    "heroLabel": "Apprendimento Interattivo",
+    "externalLink": "LINK ESTERNO",
+    "statsActiveGames": "Giochi Attivi",
+    "statsSkillDimensions": "Dimensioni di Abilità",
+    "statsDifficultyLevels": "Livelli di Difficoltà",
+    "hubName": "Centro Giochi AI Mastery",
+    "hubTagline": "Piattaforma Interattiva di Apprendimento IA"
   },
   "progress": {
     "welcomeBack": "Bentornato!",
@@ -25,22 +33,26 @@
     "detective": {
       "name": "Detective IA",
       "icon": "🔍",
-      "description": "Indaga sui guasti dell'IA. Trova allucinazioni, pregiudizi e falle di sicurezza."
+      "description": "Indaga sui guasti dell'IA. Trova allucinazioni, pregiudizi e falle di sicurezza.",
+      "cta": "GIOCA"
     },
     "arena": {
       "name": "Arena dei Prompt",
       "icon": "⚔️",
-      "description": "Crea il prompt perfetto. Competi nella classifica."
+      "description": "Crea il prompt perfetto. Competi nella classifica.",
+      "cta": "ENTRA"
     },
     "turing": {
       "name": "IA o Umano?",
       "icon": "🤖",
-      "description": "Riesci a distinguere l'output dell'IA dal lavoro umano?"
+      "description": "Riesci a distinguere l'output dell'IA dal lavoro umano?",
+      "cta": "INIZIA TEST"
     },
     "escape": {
       "name": "Escape Room IA",
       "icon": "🔐",
-      "description": "Risolvi enigmi di IA contro il tempo."
+      "description": "Risolvi enigmi di IA contro il tempo.",
+      "cta": "APRI STANZA"
     }
   },
   "detective": {
@@ -67,7 +79,12 @@
     "nextCase": "PROSSIMO CASO",
     "viewResults": "VEDI RISULTATI",
     "shuffling": "Mescolando i fascicoli...",
-    "loading": "Caricamento dei fascicoli..."
+    "loading": "Caricamento dei fascicoli...",
+    "browseCases": "Sfoglia Casi",
+    "completed": "completati",
+    "replay": "Ripeti",
+    "investigateCase": "Indaga",
+    "estimatedTime": "~3 min"
   },
   "difficulty": {
     "beginner": "Principiante",
@@ -91,6 +108,7 @@
     "overallScore": "Punteggio Complessivo",
     "masteryLevel": "Livello di Maestria",
     "skillDimensions": "Dimensioni di Abilità",
+    "improvementTips": "Aree da Migliorare",
     "caseBreakdown": "Dettaglio dei Casi",
     "playAgain": "GIOCA ANCORA",
     "backToHub": "TORNA ALLA HOME",
@@ -110,6 +128,13 @@
     "tools": "Strumenti",
     "criticalThinking": "Pensiero Critico",
     "ethics": "Etica"
+  },
+  "skillTips": {
+    "prompting": "Sii più specifico — usa numeri esatti, nomi e vincoli invece di aggettivi vaghi.",
+    "concepts": "Ripassa come funzionano i modelli di IA — dati di addestramento, token, attenzione e fine-tuning.",
+    "tools": "Esercitati con gli strumenti IA nei flussi di lavoro reali — formattazione output, uso API e integrazioni.",
+    "criticalThinking": "Metti in discussione gli output dell'IA con più attenzione — verifica le fonti, cerca lacune logiche e controlla le affermazioni.",
+    "ethics": "Considera l'impatto più ampio — chi è coinvolto, quali dati vengono usati e cosa potrebbe andare storto."
   },
   "certificate": {
     "title": "Scarica Certificato",
@@ -145,6 +170,7 @@
     "subtitle": "Riesci a distinguere i contenuti generati dall'IA dal lavoro creato dall'uomo?",
     "startChallenge": "Inizia la Sfida",
     "backToHub": "Torna alla Home",
+    "exit": "Esci",
     "ai": "IA",
     "human": "Umano",
     "correct": "Corretto!",

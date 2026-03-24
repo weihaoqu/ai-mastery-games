@@ -17,6 +17,14 @@ interface CaseRecord {
   timeSpent: number;
 }
 
+interface DeviceInfo {
+  viewport?: string;
+  screen?: string;
+  mobile?: boolean;
+  language?: string;
+  userAgent?: string;
+}
+
 interface ScoreRecord {
   id: string;
   anonymousId: string;
@@ -33,6 +41,7 @@ interface ScoreRecord {
   masteryLevel: string;
   cases: CaseRecord[];
   analysis: string;
+  device?: DeviceInfo;
   createdAt: string;
 }
 
@@ -115,6 +124,7 @@ export async function POST(request: NextRequest) {
       ...recordBase,
       id: crypto.randomUUID(),
       analysis: generateAnalysis(recordBase),
+      device: body.device || undefined,
       createdAt: new Date().toISOString(),
     };
 
@@ -168,7 +178,8 @@ export async function GET(request: NextRequest) {
       const header = [
         "id", "anonymousId", "game", "difficulty", "score", "masteryLevel",
         "prompting", "concepts", "tools", "criticalThinking", "ethics",
-        "casesCorrect", "casesTotal", "analysis", "createdAt",
+        "casesCorrect", "casesTotal", "analysis",
+        "viewport", "mobile", "language", "createdAt",
       ].join(",");
 
       const rows = records.map((r) => {
@@ -189,6 +200,9 @@ export async function GET(request: NextRequest) {
           correct,
           total,
           `"${(r.analysis || "").replace(/"/g, '""')}"`,
+          r.device?.viewport || "",
+          r.device?.mobile ?? "",
+          r.device?.language || "",
           r.createdAt,
         ].join(",");
       });

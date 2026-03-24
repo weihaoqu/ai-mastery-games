@@ -19,9 +19,7 @@ export default function SpotErrorPuzzleComponent({
   const [flashMessage, setFlashMessage] = useState<string | null>(null);
   const [result, setResult] = useState<"correct" | "incorrect" | null>(null);
 
-  // Build segments: split document by error texts, marking which are errors
   const segments = buildSegments(puzzle.document, puzzle.errors);
-
   const errorTexts = new Set(puzzle.errors.map((e) => e.text));
 
   const handleSpanClick = useCallback(
@@ -49,7 +47,6 @@ export default function SpotErrorPuzzleComponent({
 
   function handleSubmit() {
     const allFound = puzzle.errors.every((e) => selectedErrors.has(e.text));
-    // Allow up to 1 false positive
     const falsePositives = [...selectedErrors].filter(
       (s) => !errorTexts.has(s),
     ).length;
@@ -61,43 +58,52 @@ export default function SpotErrorPuzzleComponent({
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {/* Instruction */}
-      <div className="rounded-lg border border-ed-border bg-ed-parchment p-4">
-        <p className="text-sm leading-relaxed text-ed-ink">
+      <div className="space-y-3">
+        <p className="text-on-surface-variant font-medium text-base leading-relaxed">
           {puzzle.instruction}
         </p>
+        <div className="flex items-center gap-4 py-2">
+          <span className="flex items-center gap-1 px-3 py-1 bg-tertiary-container text-on-tertiary-container rounded-full font-label text-xs font-bold uppercase tracking-wider">
+            <span className="material-symbols-outlined text-sm">psychology</span> {t("clickErrors")}
+          </span>
+          <span className="text-on-surface-variant font-label text-sm">
+            {selectedErrors.size}/{puzzle.errors.length} {t("discovered")}
+          </span>
+        </div>
       </div>
 
-      <p className="text-center text-xs text-ed-ink-muted">
-        {t("clickErrors")}
-      </p>
-
-      {/* Document with clickable spans */}
-      <div className="rounded-lg border border-ed-border bg-ed-card p-5 leading-7 text-sm text-ed-ink">
-        {segments.map((seg, i) => (
-          <span
-            key={i}
-            role="button"
-            tabIndex={0}
-            onClick={() => handleSpanClick(seg.text)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleSpanClick(seg.text);
-              }
-            }}
-            className={`cursor-pointer rounded px-0.5 transition-colors focus:outline-none focus:ring-2 focus:ring-ed-teal/40 ${
-              seg.isError && selectedErrors.has(seg.text)
-                ? "bg-ed-error/20 text-ed-error underline decoration-ed-error/50"
-                : seg.isError
-                  ? "hover:bg-ed-warm"
-                  : "hover:bg-ed-warm/50"
-            } ${result === "correct" && seg.isError ? "bg-ed-success/20 text-ed-success" : ""}`}
-          >
-            {seg.text}
-          </span>
-        ))}
+      {/* AI Generated Text Block */}
+      <div className="bg-surface-container-low rounded-2xl p-6 font-mono text-on-surface leading-loose text-sm border-2 border-outline-variant/30 relative">
+        <div className="absolute -top-3 left-6 bg-surface-container-lowest px-3 py-1 border-2 border-outline-variant rounded-full text-[10px] font-bold uppercase tracking-widest text-outline">
+          System_Output_Log
+        </div>
+        <div className="pt-2">
+          {segments.map((seg, i) => (
+            <span
+              key={i}
+              role="button"
+              tabIndex={0}
+              onClick={() => handleSpanClick(seg.text)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleSpanClick(seg.text);
+                }
+              }}
+              className={`px-1 rounded transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 ${
+                seg.isError && selectedErrors.has(seg.text)
+                  ? "bg-primary-container text-on-primary-container underline decoration-primary decoration-2"
+                  : seg.isError
+                    ? "hover:bg-surface-container"
+                    : "hover:bg-surface-container/50"
+              } ${result === "correct" && seg.isError ? "bg-primary-container text-primary" : ""}`}
+            >
+              {seg.text}
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* Flash message */}
@@ -107,26 +113,21 @@ export default function SpotErrorPuzzleComponent({
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="rounded-lg border border-amber-300 bg-amber-50 p-2 text-center text-xs text-amber-700"
+            className="rounded-xl border-2 border-secondary-container bg-secondary-container/30 p-3 text-center text-xs text-on-secondary-container font-label font-bold"
           >
             {flashMessage}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Error count indicator */}
-      <p className="text-center text-xs text-ed-ink-muted">
-        {selectedErrors.size} / {puzzle.errors.length} {t("discovered")}
-      </p>
-
       {/* Result feedback */}
       {result === "incorrect" && (
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-lg border border-ed-error/30 bg-ed-error/5 p-3"
+          className="rounded-xl border-2 border-error/30 bg-error/5 p-4"
         >
-          <p className="text-sm text-ed-error">
+          <p className="text-sm text-error">
             {puzzle.errors
               .filter((e) => !selectedErrors.has(e.text))
               .map((e) => e.explanation)
@@ -139,9 +140,9 @@ export default function SpotErrorPuzzleComponent({
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-lg border border-ed-success/30 bg-ed-success/5 p-3"
+          className="rounded-xl border-2 border-primary/30 bg-primary-container/30 p-4"
         >
-          <p className="text-sm font-medium text-ed-success">{t("correct")}</p>
+          <p className="text-sm font-bold text-primary">{t("correct")}</p>
         </motion.div>
       )}
 
@@ -150,7 +151,7 @@ export default function SpotErrorPuzzleComponent({
         <button
           onClick={handleSubmit}
           disabled={selectedErrors.size === 0}
-          className="w-full rounded-lg border border-ed-teal/40 bg-ed-teal/10 px-6 py-3 font-sans text-sm font-bold text-ed-teal transition-all hover:bg-ed-teal/20 hover:shadow-[0_0_15px_rgba(13,115,119,0.15)] disabled:cursor-not-allowed disabled:opacity-40"
+          className="w-full py-4 bg-primary text-on-primary font-headline font-extrabold rounded-xl shadow-[0px_4px_0px_0px_#004c1e] active:translate-y-1 active:shadow-none transition-all border-b-4 border-primary-dim disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {t("submit")}
         </button>
@@ -172,7 +173,6 @@ function buildSegments(
   let remaining = document;
 
   while (remaining.length > 0) {
-    // Find the earliest error occurrence
     let earliest = -1;
     let earliestError: (typeof errors)[0] | null = null;
 
@@ -185,17 +185,14 @@ function buildSegments(
     }
 
     if (earliest === -1 || !earliestError) {
-      // No more errors, push remaining as non-error
       segments.push({ text: remaining, isError: false });
       break;
     }
 
-    // Push text before the error
     if (earliest > 0) {
       segments.push({ text: remaining.slice(0, earliest), isError: false });
     }
 
-    // Push the error
     segments.push({ text: earliestError.text, isError: true });
     remaining = remaining.slice(earliest + earliestError.text.length);
   }

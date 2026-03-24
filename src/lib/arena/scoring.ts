@@ -124,12 +124,14 @@ export function scoreOptimizeChallenge(
  */
 export function calculateArenaSessionResult(
   answers: ArenaAnswer[],
-  items: Array<{ id: string; skills: Record<string, number> }>,
+  items: Array<{ id: string; task?: string; skills: Record<string, number> }>,
   difficulty: Difficulty,
   mode: ArenaMode
 ): Omit<SessionResult, 'id' | 'date'> {
   const rawTotal = answers.reduce((sum, a) => sum + a.score, 0);
-  const maxPossible = 300; // ~10 rounds × 10pts × 3x max multiplier
+  // Compute max: each round can earn up to 12 base pts (10 + 2 optimize bonus) × 3x max multiplier
+  const maxPerRound = mode === 'optimize' ? 12 : 10;
+  const maxPossible = Math.max(1, answers.length * maxPerRound * MULTIPLIERS[MULTIPLIERS.length - 1]);
   const overallScore = Math.min(100, Math.round((rawTotal / maxPossible) * 100));
 
   const dimensions = { prompting: 0, concepts: 0, tools: 0, criticalThinking: 0, ethics: 0 };
@@ -138,7 +140,7 @@ export function calculateArenaSessionResult(
   answers.forEach((answer) => {
     const item = items.find((i) => i.id === answer.roundId);
     if (!item) return;
-    const normalizedScore = answer.isCorrect ? 100 : 0;
+    const normalizedScore = Math.min(100, Math.round((answer.score / 10) * 100));
     for (const dim of Object.keys(dimensions) as (keyof typeof dimensions)[]) {
       const w = item.skills[dim] ?? 0;
       dimensions[dim] += normalizedScore * w;
@@ -153,16 +155,19 @@ export function calculateArenaSessionResult(
   return {
     game: 'arena',
     difficulty,
-    cases: answers.map((a) => ({
-      caseId: a.roundId,
-      caseTitle: `${mode} round`,
-      caseType: 'ethics' as import('../types').CaseType,
-      selectedOptionId: a.isCorrect ? 'correct' : 'incorrect',
-      reasoning: '',
-      timeSpent: a.timeSpent,
-      isCorrect: a.isCorrect,
-      score: a.score,
-    })),
+    cases: answers.map((a) => {
+      const item = items.find((i) => i.id === a.roundId);
+      return {
+        caseId: a.roundId,
+        caseTitle: item?.task || `${mode} round`,
+        caseType: mode as unknown as import('../types').CaseType,
+        selectedOptionId: a.isCorrect ? 'correct' : 'incorrect',
+        reasoning: '',
+        timeSpent: a.timeSpent,
+        isCorrect: a.isCorrect,
+        score: a.score,
+      };
+    }),
     overallScore,
     dimensions,
     masteryLevel: getArenaMasteryLevel(overallScore),

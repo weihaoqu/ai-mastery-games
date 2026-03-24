@@ -1,5 +1,6 @@
 import { SessionResult } from './types';
 import { basePath } from './basePath';
+import { trackGameComplete } from './analytics';
 
 const STORAGE_KEY = 'ai-mastery-games';
 
@@ -45,8 +46,19 @@ export function saveSession(session: SessionResult): void {
   data.sessions.push(session);
   saveStorageData(data);
 
+  // Track game completion via analytics
+  trackGameComplete(session.game, session.difficulty, session.overallScore, session.masteryLevel);
+
   // Also submit to server API (best effort, fire-and-forget)
   try {
+    const device = typeof window !== 'undefined' ? {
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      screen: `${screen.width}x${screen.height}`,
+      mobile: window.innerWidth < 768,
+      language: navigator.language,
+      userAgent: navigator.userAgent,
+    } : undefined;
+
     fetch(`${basePath}/api/scores`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -65,6 +77,7 @@ export function saveSession(session: SessionResult): void {
           score: c.score,
           timeSpent: c.timeSpent,
         })),
+        device,
       }),
     });
   } catch {

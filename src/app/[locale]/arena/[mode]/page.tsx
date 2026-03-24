@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import type { ArenaMode } from "@/lib/types";
+import { track } from "@/lib/analytics";
 
 const VALID_MODES = new Set<string>(["critique", "battle", "optimize"]);
 
@@ -41,12 +42,12 @@ export default function ArenaDifficultyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-ed-cream">
+    <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Back link */}
         <Link
           href="/arena"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-ed-ink-muted transition-colors hover:text-ed-teal"
+          className="mb-8 inline-flex items-center gap-2 text-sm text-on-surface-variant transition-colors hover:text-primary"
         >
           <span>&larr;</span> {t("backToArena")}
         </Link>
@@ -58,10 +59,10 @@ export default function ArenaDifficultyPage() {
           transition={{ duration: 0.6 }}
           className="mb-12 text-center"
         >
-          <h1 className="mb-3 font-display text-4xl font-bold tracking-tight text-ed-ink sm:text-5xl lg:text-6xl">
+          <h1 className="mb-3 font-headline text-4xl font-bold tracking-tight text-on-surface sm:text-5xl lg:text-6xl">
             {tMode(`${mode}Icon`)} {tMode(mode)}
           </h1>
-          <p className="text-lg text-ed-ink-muted sm:text-xl">
+          <p className="text-lg text-on-surface-variant sm:text-xl">
             {tMode(`${mode}Desc`)}
           </p>
         </motion.div>
@@ -74,19 +75,19 @@ export default function ArenaDifficultyPage() {
           className="grid grid-cols-1 gap-5 sm:grid-cols-2"
         >
           {tierKeys.map((key) => (
-            <Link key={key} href={`/arena/${mode}/play?difficulty=${key}`}>
+            <Link key={key} href={`/arena/${mode}/play?difficulty=${key}`} onClick={() => track('difficulty_select', { game: 'arena', difficulty: key })}>
               <motion.div
                 variants={cardVariants}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
-                className="relative rounded-xl border border-ed-border bg-ed-card p-6 transition-colors hover:border-ed-teal/40 hover:shadow-md cursor-pointer sm:p-8"
+                className="relative rounded-xl border border-outline-variant bg-surface-container-lowest p-6 transition-colors hover:border-primary/40 hover:shadow-md cursor-pointer sm:p-8"
               >
                 <div className="mb-3 text-4xl">{tierEmojis[key]}</div>
-                <h2 className="mb-1 font-display text-xl font-bold text-ed-ink">
+                <h2 className="mb-1 font-headline text-xl font-bold text-on-surface">
                   {tDiff(key)}
                 </h2>
-                <p className="text-sm text-ed-ink-muted">{tDiff(`${key}Desc`)}</p>
-                <div className="mt-4 text-sm font-semibold text-ed-teal">
+                <p className="text-sm text-on-surface-variant">{tDiff(`${key}Desc`)}</p>
+                <div className="mt-4 text-sm font-semibold text-primary">
                   {t("startChallenge")} &rarr;
                 </div>
               </motion.div>

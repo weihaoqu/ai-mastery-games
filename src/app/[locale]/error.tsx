@@ -14,25 +14,25 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ed-cream px-4">
-      <div className="w-full max-w-md rounded-xl border border-ed-border bg-ed-card p-8 text-center shadow-sm">
+    <div className="flex min-h-screen items-center justify-center bg-surface px-4">
+      <div className="w-full max-w-md rounded-xl border border-outline-variant bg-surface-container-lowest p-8 text-center shadow-sm">
         <div className="mb-4 text-4xl">⚠️</div>
-        <h2 className="mb-2 font-display text-xl font-bold text-ed-ink">
+        <h2 className="mb-2 font-headline text-xl font-bold text-on-surface">
           Something went wrong
         </h2>
-        <p className="mb-6 text-sm text-ed-ink-muted">
+        <p className="mb-6 text-sm text-on-surface-variant">
           An unexpected error occurred. Please try again.
         </p>
         <div className="flex gap-3 justify-center">
           <button
             onClick={reset}
-            className="rounded-lg bg-ed-teal/10 px-6 py-2.5 text-sm font-semibold text-ed-teal transition-colors hover:bg-ed-teal/20"
+            className="rounded-lg bg-primary/10 px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
           >
             Try again
           </button>
           <a
             href="/"
-            className="rounded-lg border border-ed-border px-6 py-2.5 text-sm font-semibold text-ed-ink-muted transition-colors hover:bg-ed-warm"
+            className="rounded-lg border border-outline-variant px-6 py-2.5 text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container-low"
           >
             Back to Home
           </a>

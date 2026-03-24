@@ -3,8 +3,16 @@
     "title": "AI MASTERY GAMES",
     "subtitle": "Pon a prueba tu dominio de la IA en 4 desafíos interactivos",
     "stats": "{games} Juegos · {dimensions} Dimensiones de Habilidad · {levels} Niveles de Dificultad",
+    "aiIqTestTitle": "Haz el Test Oficial de IQ de IA",
     "aiIqTestDesc": "Mide tu conocimiento de IA con un cuestionario rápido",
-    "comingSoon": "PRÓXIMAMENTE"
+    "comingSoon": "PRÓXIMAMENTE",
+    "heroLabel": "Aprendizaje Interactivo",
+    "externalLink": "ENLACE EXTERNO",
+    "statsActiveGames": "Juegos Activos",
+    "statsSkillDimensions": "Dimensiones de Habilidad",
+    "statsDifficultyLevels": "Niveles de Dificultad",
+    "hubName": "Centro de Juegos AI Mastery",
+    "hubTagline": "Plataforma Interactiva de Aprendizaje IA"
   },
   "progress": {
     "welcomeBack": "¡Bienvenido de nuevo!",
@@ -39,22 +47,26 @@
     "detective": {
       "name": "Detective IA",
       "icon": "🔍",
-      "description": "Investiga fallos de IA. Encuentra alucinaciones, sesgos y fallos de seguridad."
+      "description": "Investiga fallos de IA. Encuentra alucinaciones, sesgos y fallos de seguridad.",
+      "cta": "JUGAR"
     },
     "arena": {
       "name": "Arena de Prompts",
       "icon": "⚔️",
-      "description": "Crea el prompt perfecto. Compite en la tabla de clasificación."
+      "description": "Crea el prompt perfecto. Compite en la tabla de clasificación.",
+      "cta": "ENTRAR"
     },
     "turing": {
       "name": "¿IA o Humano?",
       "icon": "🤖",
-      "description": "¿Puedes distinguir la IA del trabajo humano?"
+      "description": "¿Puedes distinguir la IA del trabajo humano?",
+      "cta": "INICIAR TEST"
     },
     "escape": {
       "name": "Escape Room IA",
       "icon": "🔐",
-      "description": "Resuelve puzzles de IA contra el reloj."
+      "description": "Resuelve puzzles de IA contra el reloj.",
+      "cta": "DESBLOQUEAR"
     }
   },
   "detective": {
@@ -81,7 +93,12 @@
     "nextCase": "SIGUIENTE CASO",
     "viewResults": "VER RESULTADOS",
     "shuffling": "Mezclando archivos del caso...",
-    "loading": "Cargando archivos del caso..."
+    "loading": "Cargando archivos del caso...",
+    "browseCases": "Ver Casos",
+    "completed": "completados",
+    "replay": "Repetir",
+    "investigateCase": "Investigar",
+    "estimatedTime": "~3 min"
   },
   "difficulty": {
     "beginner": "Principiante",
@@ -105,6 +122,7 @@
     "overallScore": "Puntuación General",
     "masteryLevel": "Nivel de Maestría",
     "skillDimensions": "Dimensiones de Habilidad",
+    "improvementTips": "Áreas de Mejora",
     "caseBreakdown": "Desglose de Casos",
     "playAgain": "JUGAR DE NUEVO",
     "backToHub": "VOLVER AL INICIO",
@@ -124,6 +142,13 @@
     "tools": "Herramientas",
     "criticalThinking": "Pensamiento Crítico",
     "ethics": "Ética"
+  },
+  "skillTips": {
+    "prompting": "Sé más específico — incluye números exactos, nombres y restricciones en lugar de adjetivos vagos.",
+    "concepts": "Repasa cómo funcionan los modelos de IA — datos de entrenamiento, tokens, atención y ajuste fino.",
+    "tools": "Practica usando herramientas de IA en flujos de trabajo reales — formato de salida, uso de API e integraciones.",
+    "criticalThinking": "Cuestiona las respuestas de la IA con más cuidado — verifica fuentes, busca vacíos lógicos y confirma afirmaciones.",
+    "ethics": "Considera el impacto más amplio — quién se ve afectado, qué datos se usan y qué podría salir mal."
   },
   "certificate": {
     "title": "Descargar Certificado",
@@ -159,6 +184,7 @@
     "subtitle": "¿Puedes distinguir el contenido generado por IA del trabajo creado por humanos?",
     "startChallenge": "Iniciar Desafío",
     "backToHub": "Volver al Inicio",
+    "exit": "Salir",
     "ai": "IA",
     "human": "Humano",
     "correct": "¡Correcto!",
