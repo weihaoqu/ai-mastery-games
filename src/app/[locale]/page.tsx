@@ -19,7 +19,7 @@ const gameHotspots = [
     shadowColor: "shadow-[6px_6px_0_0_#006a2d]",
     hoverShadow: "group-hover:shadow-[8px_8px_0_0_#006a2d]",
     badgeBg: "bg-primary",
-    position: "bottom-[28%] left-[12%]",
+    position: "bottom-[28%] left-[18%]",
     size: "w-28 h-32",
     iconColor: "text-primary",
   },
@@ -48,6 +48,71 @@ const gameHotspots = [
     position: "bottom-[12%] right-[15%]",
     size: "w-28 h-32",
     iconColor: "text-primary",
+  },
+  {
+    key: "hunter",
+    href: "/hunter",
+    icon: "target",
+    image: "/images/icons/hunter.png",
+    borderColor: "border-error",
+    shadowColor: "shadow-[6px_6px_0_0_#b42828]",
+    hoverShadow: "group-hover:shadow-[8px_8px_0_0_#b42828]",
+    badgeBg: "bg-error",
+    position: "top-[50%] left-[8%]",
+    size: "w-28 h-32",
+    iconColor: "text-error",
+  },
+  {
+    key: "ethics",
+    href: "/ethics",
+    icon: "balance",
+    image: "/images/icons/ethics.png",
+    borderColor: "border-tertiary",
+    shadowColor: "shadow-[6px_6px_0_0_#5b4bb4]",
+    hoverShadow: "group-hover:shadow-[8px_8px_0_0_#5b4bb4]",
+    badgeBg: "bg-tertiary",
+    position: "bottom-[10%] left-[38%]",
+    size: "w-28 h-32",
+    iconColor: "text-tertiary",
+  },
+  {
+    key: "tycoon",
+    href: "/tycoon",
+    icon: "business_center",
+    image: "/images/icons/tycoon.png",
+    borderColor: "border-secondary",
+    shadowColor: "shadow-[6px_6px_0_0_#9b3f00]",
+    hoverShadow: "group-hover:shadow-[8px_8px_0_0_#9b3f00]",
+    badgeBg: "bg-secondary",
+    position: "top-[8%] left-[52%]",
+    size: "w-28 h-32",
+    iconColor: "text-secondary",
+  },
+  {
+    key: "pipeline",
+    href: "/pipeline",
+    icon: "security",
+    image: "/images/icons/pipeline.png",
+    borderColor: "border-primary",
+    shadowColor: "shadow-[6px_6px_0_0_#006a2d]",
+    hoverShadow: "group-hover:shadow-[8px_8px_0_0_#006a2d]",
+    badgeBg: "bg-primary",
+    position: "top-[45%] right-[20%]",
+    size: "w-28 h-32",
+    iconColor: "text-primary",
+  },
+  {
+    key: "tumble",
+    href: "/tumble",
+    icon: "sort",
+    image: "/images/icons/tumble.png",
+    borderColor: "border-error",
+    shadowColor: "shadow-[6px_6px_0_0_#b42828]",
+    hoverShadow: "group-hover:shadow-[8px_8px_0_0_#b42828]",
+    badgeBg: "bg-error",
+    position: "bottom-[20%] right-[35%]",
+    size: "w-28 h-32",
+    iconColor: "text-error",
   },
   {
     key: "escape",
@@ -133,10 +198,10 @@ export default function Home() {
                 <div className="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full transition-all duration-700"
-                    style={{ width: `${(gamesPlayed / 4) * 100}%` }}
+                    style={{ width: `${(gamesPlayed / 9) * 100}%` }}
                   />
                 </div>
-                <span className="font-label font-bold text-primary">{gamesPlayed}/4</span>
+                <span className="font-label font-bold text-primary">{gamesPlayed}/9</span>
               </div>
               <p className="text-xs text-on-surface-variant italic">
                 {tHub("subtitle")}
@@ -247,7 +312,7 @@ export default function Home() {
                 </div>
                 <div className="flex gap-8">
                   <div>
-                    <p className="text-3xl font-black text-on-surface font-headline">4</p>
+                    <p className="text-3xl font-black text-on-surface font-headline">9</p>
                     <p className="text-xs font-label text-on-surface-variant uppercase tracking-widest">{tHub("statsActiveGames")}</p>
                   </div>
                   <div>
@@ -296,6 +361,22 @@ export default function Home() {
               <li className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full bg-green-600" />
                 <span>{tGames("turing.name")}</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-purple-600" />
+                <span>{tGames("ethics.name")}</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-amber-700" />
+                <span>{tGames("tycoon.name")}</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-emerald-600" />
+                <span>{tGames("pipeline.name")}</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-rose-600" />
+                <span>{tGames("tumble.name")}</span>
               </li>
             </ul>
 

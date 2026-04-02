@@ -5,7 +5,9 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
-import type { Case, PlayerAnswer, Difficulty } from "@/lib/types";
+import type { Case, PlayerAnswer, Difficulty, Evidence } from "@/lib/types";
+import InteractiveScene from "@/components/detective/InteractiveScene";
+import EvidenceModal from "@/components/detective/EvidenceModal";
 import { scoreAnswer, calculateSessionResult } from "@/lib/detective/scoring";
 import { beginnerCases } from "@/data/detective/beginner";
 import { intermediateCases } from "@/data/detective/intermediate";
@@ -15,6 +17,7 @@ import { translateCases } from "@/lib/detective/translate-cases";
 import { playCorrect, playWrong } from "@/lib/sounds";
 import { GamePlaySkeleton } from "@/components/Skeleton";
 import { trackGameStart, trackCaseAnswer, trackGameAbandon } from "@/lib/analytics";
+import { basePath } from "@/lib/basePath";
 
 const allCases: Case[] = [
   ...beginnerCases,
@@ -85,6 +88,17 @@ function PlayInner() {
   const [submitted, setSubmitted] = useState(false);
   const [answer, setAnswer] = useState<PlayerAnswer | null>(null);
   const caseStartRef = useRef(Date.now());
+  const [discoveredEvidence, setDiscoveredEvidence] = useState<Set<string>>(new Set());
+  const [modalEvidence, setModalEvidence] = useState<Evidence | null>(null);
+
+  const handleDiscover = useCallback((evidence: Evidence) => {
+    setDiscoveredEvidence(prev => {
+      const next = new Set(prev);
+      next.add(evidence.id);
+      return next;
+    });
+    setModalEvidence(evidence);
+  }, []);
 
   // Load the single case
   useEffect(() => {
@@ -120,7 +134,7 @@ function PlayInner() {
   const handleSubmit = useCallback(() => {
     if (!selectedOption || !theCase || submitted) return;
     const timeSpent = Math.round((Date.now() - caseStartRef.current) / 1000);
-    const result = scoreAnswer(theCase, selectedOption, "", timeSpent);
+    const result = scoreAnswer(theCase, selectedOption, "", timeSpent, discoveredEvidence.size);
     setAnswer(result);
     setSubmitted(true);
     trackCaseAnswer("detective", theCase.id, result.isCorrect, timeSpent);
@@ -142,14 +156,9 @@ function PlayInner() {
         trackGameAbandon("detective", theCaseRef.current.difficulty, 0);
       }
     };
-    const visibilityHandler = () => {
-      if (document.visibilityState === "hidden") handler();
-    };
     window.addEventListener("beforeunload", handler);
-    document.addEventListener("visibilitychange", visibilityHandler);
     return () => {
       window.removeEventListener("beforeunload", handler);
-      document.removeEventListener("visibilitychange", visibilityHandler);
     };
   }, []);
 
@@ -180,87 +189,168 @@ function PlayInner() {
       </div>
 
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        {/* Case Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-8"
-        >
-          <h1 className="text-3xl sm:text-4xl font-black font-headline text-on-surface mb-3 leading-tight">
-            {theCase.title}
-          </h1>
-          <p className="text-base text-on-surface-variant leading-relaxed">
-            {theCase.briefing}
-          </p>
-        </motion.div>
+        {/* Interactive Scene or Fallback */}
+        {theCase.imagePath && theCase.evidence.some(e => e.hotspot) ? (
+          <>
+            {/* Case Header */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="mb-6"
+            >
+              <h1 className="text-3xl sm:text-4xl font-black font-headline text-on-surface mb-3 leading-tight">
+                {theCase.title}
+              </h1>
+              <p className="text-base text-on-surface-variant leading-relaxed">
+                {theCase.briefing}
+              </p>
+            </motion.div>
 
-        {/* Evidence Cards */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.4 }}
-          className="mb-10"
-        >
-          <h2 className="flex items-center gap-2 text-sm font-label font-bold text-on-surface-variant uppercase tracking-widest mb-4">
-            <span className="material-symbols-outlined text-lg">folder_open</span>
-            {t("evidenceBoard")}
-          </h2>
-          <div className="space-y-3">
-            {theCase.evidence.map((ev, i) => {
-              const isExpanded = expandedEvidence.has(ev.id);
-              return (
-                <motion.div
-                  key={ev.id}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + i * 0.08, duration: 0.3 }}
-                >
+            {/* Discovery counter */}
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-label font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
+                <span className="material-symbols-outlined text-lg">search</span>
+                {t("evidenceBoard")}
+              </span>
+              <span className="text-xs font-mono font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+                {discoveredEvidence.size}/{theCase.evidence.filter(e => e.hotspot).length} found
+              </span>
+            </div>
+
+            {/* Interactive scene */}
+            <div className="mb-8">
+              <InteractiveScene
+                imagePath={theCase.imagePath}
+                evidence={theCase.evidence}
+                discoveredIds={discoveredEvidence}
+                onDiscover={handleDiscover}
+              />
+            </div>
+
+            {/* Discovered evidence list */}
+            {discoveredEvidence.size > 0 && (
+              <div className="mb-8 space-y-2">
+                {theCase.evidence.filter(e => discoveredEvidence.has(e.id)).map((ev) => (
                   <button
-                    onClick={() => toggleEvidence(ev.id)}
-                    className={`w-full text-left rounded-xl border-2 transition-all ${
-                      ev.isKey
-                        ? "border-amber-400/60 bg-amber-50/50"
-                        : "border-outline-variant/50 bg-surface-container-lowest"
-                    } ${isExpanded ? "shadow-md" : "shadow-sm hover:shadow-md"}`}
+                    key={ev.id}
+                    onClick={() => setModalEvidence(ev)}
+                    className="w-full text-left flex items-center gap-3 px-4 py-2 bg-surface-container-lowest border border-outline-variant/50 rounded-xl hover:bg-primary/5 transition-colors"
                   >
-                    <div className="flex items-center gap-3 px-4 py-3">
-                      <span className={`material-symbols-outlined text-xl ${ev.isKey ? "text-amber-600" : "text-on-surface-variant"}`}>
-                        {evidenceIconMap[ev.type] ?? "description"}
+                    <span className="material-symbols-outlined text-primary text-sm">check_circle</span>
+                    <span className="text-sm font-medium text-on-surface">{ev.title}</span>
+                    {ev.isKey && (
+                      <span className="text-[9px] font-black bg-amber-400/30 text-amber-800 px-1.5 py-0.5 rounded-full uppercase tracking-wider ml-auto">
+                        KEY
                       </span>
-                      <span className="font-bold text-on-surface text-sm flex-1">{ev.title}</span>
-                      {ev.isKey && (
-                        <span className="text-[10px] font-black bg-amber-400/30 text-amber-800 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                          {t("keyEvidence")}
-                        </span>
-                      )}
-                      <span className={`material-symbols-outlined text-on-surface-variant text-lg transition-transform ${isExpanded ? "rotate-180" : ""}`}>
-                        expand_more
-                      </span>
-                    </div>
-                  </button>
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="overflow-hidden"
-                      >
-                        <div className={`px-4 pb-4 pt-2 ml-9 mr-4 text-sm leading-relaxed text-on-surface-variant ${
-                          ev.isKey ? "" : ""
-                        }`}>
-                          {ev.content}
-                        </div>
-                      </motion.div>
                     )}
-                  </AnimatePresence>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Evidence modal */}
+            <EvidenceModal evidence={modalEvidence} onClose={() => setModalEvidence(null)} />
+          </>
+        ) : (
+          <>
+            {/* Fallback: static image */}
+            {theCase.imagePath && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="w-full rounded-2xl overflow-hidden border-2 border-outline-variant shadow-[0_4px_0_0_rgba(0,106,45,0.4)] mb-6"
+              >
+                <img
+                  src={`${basePath}${theCase.imagePath}`}
+                  alt={theCase.title}
+                  className="w-full h-auto object-cover"
+                />
+              </motion.div>
+            )}
+
+            {/* Case Header */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="mb-8"
+            >
+              <h1 className="text-3xl sm:text-4xl font-black font-headline text-on-surface mb-3 leading-tight">
+                {theCase.title}
+              </h1>
+              <p className="text-base text-on-surface-variant leading-relaxed">
+                {theCase.briefing}
+              </p>
+            </motion.div>
+
+            {/* Evidence Cards (fallback) */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+              className="mb-10"
+            >
+              <h2 className="flex items-center gap-2 text-sm font-label font-bold text-on-surface-variant uppercase tracking-widest mb-4">
+                <span className="material-symbols-outlined text-lg">folder_open</span>
+                {t("evidenceBoard")}
+              </h2>
+              <div className="space-y-3">
+                {theCase.evidence.map((ev, i) => {
+                  const isExpanded = expandedEvidence.has(ev.id);
+                  return (
+                    <motion.div
+                      key={ev.id}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 + i * 0.08, duration: 0.3 }}
+                    >
+                      <button
+                        onClick={() => toggleEvidence(ev.id)}
+                        className={`w-full text-left rounded-xl border-2 transition-all ${
+                          ev.isKey
+                            ? "border-amber-400/60 bg-amber-50/50"
+                            : "border-outline-variant/50 bg-surface-container-lowest"
+                        } ${isExpanded ? "shadow-md" : "shadow-sm hover:shadow-md"}`}
+                      >
+                        <div className="flex items-center gap-3 px-4 py-3">
+                          <span className={`material-symbols-outlined text-xl ${ev.isKey ? "text-amber-600" : "text-on-surface-variant"}`}>
+                            {evidenceIconMap[ev.type] ?? "description"}
+                          </span>
+                          <span className="font-bold text-on-surface text-sm flex-1">{ev.title}</span>
+                          {ev.isKey && (
+                            <span className="text-[10px] font-black bg-amber-400/30 text-amber-800 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                              {t("keyEvidence")}
+                            </span>
+                          )}
+                          <span className={`material-symbols-outlined text-on-surface-variant text-lg transition-transform ${isExpanded ? "rotate-180" : ""}`}>
+                            expand_more
+                          </span>
+                        </div>
+                      </button>
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.25 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-4 pb-4 pt-2 ml-9 mr-4 text-sm leading-relaxed text-on-surface-variant">
+                              {ev.content}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </>
+        )}
 
         {/* Question & Options */}
         <motion.div

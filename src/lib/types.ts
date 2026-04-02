@@ -3,12 +3,20 @@ export type ContentType = 'email' | 'essay' | 'code' | 'social-media' | 'creativ
 export type Difficulty = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 export type MasteryLevel = 'novice' | 'apprentice' | 'practitioner' | 'expert' | 'master';
 
+export interface EvidenceHotspot {
+  x: number;      // percentage from left (0-100)
+  y: number;      // percentage from top (0-100)
+  w: number;      // width as percentage (0-100)
+  h: number;      // height as percentage (0-100)
+}
+
 export interface Evidence {
   id: string;
   title: string;
   type: 'document' | 'screenshot' | 'data' | 'email' | 'chat-log' | 'code';
   content: string;  // the actual evidence text/description
   isKey: boolean;    // is this a key piece of evidence?
+  hotspot?: EvidenceHotspot;  // position on scene image for interactive mode
 }
 
 export interface DiagnosisOption {
@@ -25,6 +33,7 @@ export interface Case {
   difficulty: Difficulty;
   briefing: string;          // narrative intro
   context: string;           // background context
+  imagePath?: string;        // noir scene illustration
   evidence: Evidence[];
   question: string;          // "What went wrong?"
   options: DiagnosisOption[];
@@ -271,6 +280,157 @@ export interface EscapeResult {
   answers: EscapeAnswer[];
 }
 
+// === Hallucination Hunter Types ===
+
+export type ClaimCategory = 'factual' | 'citation' | 'code' | 'temporal' | 'entity' | 'statistical';
+
+export interface HunterClaim {
+  id: string;
+  text: string;
+  isHallucination: boolean;
+  category: ClaimCategory;
+  explanation: string;
+  source?: string;
+  difficulty: Difficulty;
+  skills: {
+    prompting: number;
+    concepts: number;
+    tools: number;
+    criticalThinking: number;
+    ethics: number;
+  };
+}
+
+export interface HunterAnswer {
+  claimId: string;
+  playerAction: 'shot' | 'passed';
+  isCorrect: boolean;
+  score: number;
+  streak: number;
+  multiplier: number;
+  timeSpent: number;
+}
+
+// === AI Ethics Quest Types ===
+
+export interface EthicsScenario {
+  id: string;
+  difficulty: Difficulty;
+  title: string;
+  role: string;
+  setup: string;
+  dilemma: string;
+  choices: EthicsChoice[];
+  skills: { prompting: number; concepts: number; tools: number; criticalThinking: number; ethics: number; };
+}
+
+export interface EthicsChoice {
+  id: string;
+  text: string;
+  consequence: string;
+  impact: { trust: number; profit: number; safety: number; equity: number; };
+  isOptimal: boolean;
+  reasoning: string;
+}
+
+export interface EthicsAnswer {
+  scenarioId: string;
+  choiceId: string;
+  isOptimal: boolean;
+  score: number;
+  meters: { trust: number; profit: number; safety: number; equity: number; };
+  timeSpent: number;
+}
+
+// === AI Startup Tycoon Types ===
+
+export interface TycoonScenario {
+  id: string;
+  difficulty: Difficulty;
+  quarter: number;
+  title: string;
+  context: string;
+  imagePath?: string;
+  decisions: TycoonDecision[];
+  skills: { prompting: number; concepts: number; tools: number; criticalThinking: number; ethics: number; };
+}
+
+export interface TycoonDecision {
+  id: string;
+  text: string;
+  outcome: string;
+  impact: { revenue: number; reputation: number; trust: number; regulatory: number; };
+  isOptimal: boolean;
+  reasoning: string;
+}
+
+export interface TycoonAnswer {
+  scenarioId: string;
+  decisionId: string;
+  isOptimal: boolean;
+  score: number;
+  meters: { revenue: number; reputation: number; trust: number; regulatory: number; };
+  timeSpent: number;
+}
+
+// === AI Pipeline Defense Types ===
+
+export type ThreatType = 'bias' | 'drift' | 'adversarial' | 'leakage' | 'hallucination' | 'overfit';
+export type PipelineStage = 'collection' | 'preprocessing' | 'training' | 'deployment' | 'monitoring';
+
+export interface DefenseOption {
+  id: string;
+  text: string;
+  stage: PipelineStage;
+  isCorrect: boolean;
+  explanation: string;
+}
+
+export interface PipelineThreat {
+  id: string;
+  difficulty: Difficulty;
+  wave: number;
+  title: string;
+  threatType: ThreatType;
+  description: string;
+  affectedStage: PipelineStage;
+  defenses: DefenseOption[];
+  damage: number;
+  skills: { prompting: number; concepts: number; tools: number; criticalThinking: number; ethics: number; };
+}
+
+export interface PipelineAnswer {
+  threatId: string;
+  defenseId: string;
+  isCorrect: boolean;
+  score: number;
+  pipelineHealth: number;
+  timeSpent: number;
+}
+
+// === Token Tumble Types ===
+
+export interface TokenPuzzle {
+  id: string;
+  difficulty: Difficulty;
+  title: string;
+  instruction: string;
+  scrambledTokens: string[];
+  correctOrder: number[];
+  explanation: string;
+  category: 'prompt' | 'concept' | 'architecture' | 'workflow';
+  skills: { prompting: number; concepts: number; tools: number; criticalThinking: number; ethics: number; };
+}
+
+export interface TokenAnswer {
+  puzzleId: string;
+  playerOrder: number[];
+  isCorrect: boolean;
+  score: number;
+  timeSpent: number;
+  streak: number;
+}
+
 // === Shared Types ===
 
 export interface PlayerAnswer {
@@ -286,7 +446,7 @@ export interface PlayerAnswer {
 
 export interface SessionResult {
   id: string;
-  game: 'detective' | 'arena' | 'turing' | 'escape';
+  game: 'detective' | 'arena' | 'turing' | 'escape' | 'hunter' | 'ethics' | 'tycoon' | 'pipeline' | 'tumble';
   difficulty: Difficulty;
   date: string;
   cases: PlayerAnswer[];

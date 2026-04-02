@@ -190,6 +190,10 @@ export default function AdminPage() {
           </div>
         )}
 
+        <SkillGaps records={filtered} />
+        <ScoreDistribution records={filtered} />
+        <GameAvgScores records={filtered} />
+
         {/* Filters */}
         <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
           <select value={filterGame} onChange={(e) => setFilterGame(e.target.value)} style={selectStyle}>
@@ -198,6 +202,11 @@ export default function AdminPage() {
             <option value="arena">Arena</option>
             <option value="turing">Turing</option>
             <option value="escape">Escape Room</option>
+            <option value="hunter">Hunter</option>
+            <option value="ethics">Ethics Quest</option>
+            <option value="tycoon">Tycoon</option>
+            <option value="pipeline">Pipeline</option>
+            <option value="tumble">Tumble</option>
           </select>
           <select value={filterDifficulty} onChange={(e) => setFilterDifficulty(e.target.value)} style={selectStyle}>
             <option value="all">All Difficulties</option>
@@ -312,11 +321,132 @@ function StatCard({ label, value }: { label: string; value: number }) {
 
 import { Fragment } from "react";
 
+function SkillGaps({ records }: { records: ScoreRecord[] }) {
+  if (records.length === 0) return null;
+
+  const dims = ["prompting", "concepts", "tools", "criticalThinking", "ethics"] as const;
+  const avgs = dims.map((dim) => {
+    const sum = records.reduce((s, r) => s + (r.dimensions[dim] || 0), 0);
+    return { dim, avg: Math.round(sum / records.length) };
+  }).sort((a, b) => a.avg - b.avg);
+
+  const barColor = (v: number) => v < 40 ? "#dc2626" : v < 60 ? "#ca8a04" : "#16a34a";
+  const dimLabels: Record<string, string> = {
+    prompting: "Prompting", concepts: "Concepts", tools: "Tools",
+    criticalThinking: "Critical Thinking", ethics: "Ethics",
+  };
+
+  return (
+    <div style={{ marginBottom: "1.5rem" }}>
+      <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#1e3a12", marginBottom: "0.75rem" }}>Class Skill Gaps</h2>
+      <div style={{ background: "white", borderRadius: "8px", padding: "1rem", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+        {avgs.map(({ dim, avg }) => (
+          <div key={dim} style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
+            <span style={{ width: "120px", fontSize: "0.8rem", fontWeight: 600, color: "#333", textAlign: "right" }}>
+              {dimLabels[dim]}
+            </span>
+            <div style={{ flex: 1, background: "#f0f0f0", borderRadius: "4px", height: "24px", position: "relative" }}>
+              <div style={{ width: `${avg}%`, background: barColor(avg), borderRadius: "4px", height: "100%", transition: "width 0.5s ease" }} />
+            </div>
+            <span style={{ width: "40px", fontSize: "0.875rem", fontWeight: 700, color: barColor(avg) }}>{avg}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ScoreDistribution({ records }: { records: ScoreRecord[] }) {
+  if (records.length === 0) return null;
+
+  const buckets = Array(10).fill(0);
+  for (const r of records) {
+    const idx = Math.min(9, Math.floor(r.score / 10));
+    buckets[idx]++;
+  }
+  const maxCount = Math.max(...buckets, 1);
+  const labels = ["0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "80-89", "90-100"];
+
+  return (
+    <div style={{ marginBottom: "1.5rem" }}>
+      <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#1e3a12", marginBottom: "0.75rem" }}>Score Distribution</h2>
+      <div style={{ background: "white", borderRadius: "8px", padding: "1rem", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: "4px", height: "120px" }}>
+          {buckets.map((count, i) => (
+            <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", height: "100%" }}>
+              {count > 0 && (
+                <span style={{ fontSize: "0.65rem", fontWeight: 600, color: "#666", marginBottom: "2px" }}>{count}</span>
+              )}
+              <div style={{
+                width: "100%",
+                height: `${(count / maxCount) * 100}%`,
+                minHeight: count > 0 ? "4px" : "0",
+                background: i < 4 ? "#dc2626" : i < 6 ? "#ca8a04" : "#16a34a",
+                borderRadius: "3px 3px 0 0",
+              }} />
+            </div>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: "4px", marginTop: "4px" }}>
+          {labels.map((label) => (
+            <div key={label} style={{ flex: 1, textAlign: "center", fontSize: "0.6rem", color: "#888" }}>{label}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GameAvgScores({ records }: { records: ScoreRecord[] }) {
+  if (records.length === 0) return null;
+
+  const gameNames: Record<string, string> = {
+    detective: "Detective", arena: "Arena", turing: "Turing", escape: "Escape",
+    hunter: "Hunter", ethics: "Ethics", tycoon: "Tycoon", pipeline: "Pipeline", tumble: "Tumble",
+  };
+
+  const byGame: Record<string, number[]> = {};
+  for (const r of records) {
+    if (!byGame[r.game]) byGame[r.game] = [];
+    byGame[r.game].push(r.score);
+  }
+
+  const avgs = Object.entries(byGame)
+    .map(([game, scores]) => ({ game, avg: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length), count: scores.length }))
+    .sort((a, b) => a.avg - b.avg);
+
+  const barColor = (v: number) => v < 40 ? "#dc2626" : v < 60 ? "#ca8a04" : "#16a34a";
+
+  return (
+    <div style={{ marginBottom: "1.5rem" }}>
+      <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#1e3a12", marginBottom: "0.75rem" }}>Avg Score by Game</h2>
+      <div style={{ background: "white", borderRadius: "8px", padding: "1rem", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+        {avgs.map(({ game, avg, count }) => (
+          <div key={game} style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
+            <span style={{ width: "80px", fontSize: "0.8rem", fontWeight: 600, color: "#333", textAlign: "right", textTransform: "capitalize" }}>
+              {gameNames[game] || game}
+            </span>
+            <div style={{ flex: 1, background: "#f0f0f0", borderRadius: "4px", height: "20px", position: "relative" }}>
+              <div style={{ width: `${avg}%`, background: barColor(avg), borderRadius: "4px", height: "100%", transition: "width 0.5s ease" }} />
+            </div>
+            <span style={{ width: "60px", fontSize: "0.8rem", fontWeight: 600, color: "#666" }}>{avg} ({count})</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const gameColors: Record<string, string> = {
   detective: "#dbeafe",
   arena: "#fef3c7",
   turing: "#d1fae5",
   escape: "#fce7f3",
+  hunter: "#e0e7ff",
+  ethics: "#fef9c3",
+  tycoon: "#ede9fe",
+  pipeline: "#ccfbf1",
+  tumble: "#fce7f3",
 };
 
 const thStyle: React.CSSProperties = { padding: "0.75rem 1rem", fontSize: "0.8rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" };

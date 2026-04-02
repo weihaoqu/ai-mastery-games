@@ -123,3 +123,16 @@ body {
   animation: typewriter 2.5s steps(40, end), blink-caret 0.75s step-end infinite;
 }
 
+/* ── Hunter CRT Flash Animations ── */
+@keyframes flash-green {
+  0% { box-shadow: 0 0 30px rgba(0,255,0,0.15), inset 0 0 60px rgba(0,0,0,0.5); }
+  50% { box-shadow: 0 0 60px rgba(0,255,0,0.5), inset 0 0 30px rgba(0,255,0,0.2); }
+  100% { box-shadow: 0 0 30px rgba(0,255,0,0.15), inset 0 0 60px rgba(0,0,0,0.5); }
+}
+
+@keyframes flash-red {
+  0% { box-shadow: 0 0 30px rgba(0,255,0,0.15), inset 0 0 60px rgba(0,0,0,0.5); }
+  50% { box-shadow: 0 0 60px rgba(255,0,0,0.5), inset 0 0 30px rgba(255,0,0,0.2); }
+  100% { box-shadow: 0 0 30px rgba(0,255,0,0.15), inset 0 0 60px rgba(0,0,0,0.5); }
+}
+

@@ -148,14 +148,9 @@ function PlayInner() {
         trackGameAbandon("turing", difficulty, prog);
       }
     };
-    const visibilityHandler = () => {
-      if (document.visibilityState === "hidden") handler();
-    };
     window.addEventListener("beforeunload", handler);
-    document.addEventListener("visibilitychange", visibilityHandler);
     return () => {
       window.removeEventListener("beforeunload", handler);
-      document.removeEventListener("visibilitychange", visibilityHandler);
     };
   }, [difficulty]);
 

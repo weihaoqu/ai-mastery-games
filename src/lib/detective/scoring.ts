@@ -1,6 +1,6 @@
 import { Case, PlayerAnswer, MasteryLevel, SessionResult, Difficulty } from '../types';
 
-export function scoreAnswer(case_: Case, selectedOptionId: string, reasoning: string, timeSpent: number): PlayerAnswer {
+export function scoreAnswer(case_: Case, selectedOptionId: string, reasoning: string, timeSpent: number, discoveredCount?: number): PlayerAnswer {
   const option = case_.options.find(o => o.id === selectedOptionId);
   const isCorrect = option?.isCorrect ?? false;
 
@@ -15,6 +15,14 @@ export function scoreAnswer(case_: Case, selectedOptionId: string, reasoning: st
   if (timeSpent < 60) score += 10;
   else if (timeSpent < 180) score += Math.round(10 * (1 - (timeSpent - 60) / 120));
 
+  // Discovery bonus: up to 15 points based on evidence found in interactive mode
+  if (discoveredCount !== undefined) {
+    const totalHotspots = case_.evidence.filter(e => e.hotspot).length;
+    if (totalHotspots > 0) {
+      score += Math.round(15 * (discoveredCount / totalHotspots));
+    }
+  }
+
   return {
     caseId: case_.id,
     caseTitle: case_.title,
@@ -23,7 +31,7 @@ export function scoreAnswer(case_: Case, selectedOptionId: string, reasoning: st
     reasoning,
     timeSpent,
     isCorrect,
-    score: Math.min(100, Math.max(0, score)),
+    score: Math.min(115, Math.max(0, score)),
   };
 }
 
